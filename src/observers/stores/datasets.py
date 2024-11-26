@@ -51,6 +51,7 @@ class DatasetsStore(Store):
         """Clean up temporary directory on exit"""
         if self._temp_dir and os.path.exists(self._temp_dir):
             import shutil
+
             shutil.rmtree(self._temp_dir)
 
     def _init_table(self, record: "Record"):

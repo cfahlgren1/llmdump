@@ -42,3 +42,6 @@ distribution = true
 test = [
     "pytest>=8.3.3",
 ]
+lint = [
+    "black>=24.10.0",
+]
