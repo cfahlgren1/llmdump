@@ -16,6 +16,12 @@ First things first! You can install the SDK with pip as follows:
 pip install observers
 ```
 
+Or if you want to use AISuite, you can install the SDK with pip as follows:
+
+```bash
+pip install observers[aisuite]
+```
+
 ## Usage
 
 We differentiate between observers and stores. Observers wrap generative AI APIs (like OpenAI or llama-index) and track their interactions. Stores are classes that sync these observations to different storage backends (like DuckDB or Hugging Face datasets).
@@ -43,7 +49,7 @@ response = client.chat.completions.create(
 ### Supported Observers
 
 - [OpenAI](https://openai.com/) and every other LLM provider that implements the [OpenAI API message formate](https://platform.openai.com/docs/api-reference)
-
+- [AISuite](https://github.com/aisuite-ai/aisuite)
 ### Change OpenAI compliant LLM provider
 
 The `wrap_openai` function allows you to wrap any OpenAI compliant LLM provider. Take a look at [the example doing this for Ollama](./examples/ollama_example.py) for more details.
