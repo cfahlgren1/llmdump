@@ -18,7 +18,7 @@ class AISuiteResponseRecord(OpenAIResponseRecord):
 
     @property
     def table_name(self):
-        return "aisuite_record"
+        return "aisuite_records"
 
 
 # copy of openai wrap
