@@ -29,6 +29,10 @@ dependencies = [
     "argilla>=2.0.0",
 ]
 
+[project.optional-dependencies]
+aisuite = [
+    "aisuite[all]>=0.1.6",
+]
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
