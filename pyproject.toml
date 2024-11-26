@@ -33,6 +33,11 @@ dependencies = [
 aisuite = [
     "aisuite[all]>=0.1.6",
 ]
+dev = [
+    "pytest>=8.3.3",
+    "black>=24.10.0",
+]
+
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
@@ -40,11 +45,3 @@ build-backend = "pdm.backend"
 
 [tool.pdm]
 distribution = true
-
-[dependency-groups]
-test = [
-    "pytest>=8.3.3",
-]
-lint = [
-    "black>=24.10.0",
-]
