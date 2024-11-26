@@ -37,3 +37,8 @@ build-backend = "pdm.backend"
 
 [tool.pdm]
 distribution = true
+
+[dependency-groups]
+test = [
+    "pytest>=8.3.3",
+]
