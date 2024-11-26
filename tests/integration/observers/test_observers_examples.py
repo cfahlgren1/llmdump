@@ -2,45 +2,76 @@ import os
 from unittest.mock import MagicMock, patch
 
 import pytest
+from openai.types.chat import (
+    ChatCompletion,
+    ChatCompletionMessage,
+)
+from openai.types.chat.chat_completion import Choice, CompletionUsage
 
 
-def test_example_files_execute():
-    """Test that all example files execute without errors"""
+def get_example_files():
+    """Get list of example files to test"""
     examples_dir = "examples/observers"
-
-    # Skip if examples directory doesn't exist
     if not os.path.exists(examples_dir):
-        pytest.skip("Examples directory not found")
+        return []
+    return [
+        os.path.join(examples_dir, f)
+        for f in os.listdir(examples_dir)
+        if f.endswith(".py")
+    ]
 
-    # Create mock clients
+
+@pytest.fixture
+def mock_clients():
+    """Fixture providing mocked API clients"""
+    fake_return = ChatCompletion(
+        id="123",
+        choices=[
+            Choice(
+                message=ChatCompletionMessage(
+                    content="", role="assistant", tool_calls=None, audio=None
+                ),
+                finish_reason="stop",
+                index=0,
+                logprobs=None,
+            )
+        ],
+        model="gpt-4o",
+        usage=CompletionUsage(prompt_tokens=10, completion_tokens=10, total_tokens=20),
+        created=1727238800,
+        object="chat.completion",
+        system_fingerprint=None,
+    )
+
     mock_openai = MagicMock()
-    mock_openai.chat.completions.create.return_value = {}
+    mock_openai.chat.completions.create.return_value = fake_return
 
     mock_aisuite = MagicMock()
-    mock_aisuite.chat.completions.create.return_value = {}
+    mock_aisuite.chat.completions.create.return_value = fake_return
 
-    # Mock classes that make external calls
     mocks = {
         "openai.OpenAI": patch("openai.OpenAI", return_value=mock_openai),
         "aisuite.Client": patch("aisuite.Client", return_value=mock_aisuite),
     }
 
-    # Start all the mocks
     for mock in mocks.values():
         mock.start()
 
-    try:
-        for file in os.listdir(examples_dir):
-            if file.endswith(".py"):
-                example_path = os.path.join(examples_dir, file)
-                print(f"Executing {file}")
+    yield
 
-                # Each example should execute without raising an exception
-                try:
-                    exec(open(example_path).read())
-                except Exception as e:
-                    pytest.fail(f"Failed to execute {file}: {str(e)}")
-    finally:
-        # Stop all mocks even if there's an error
-        for mock in mocks.values():
-            mock.stop()
+    for mock in mocks.values():
+        mock.stop()
+
+
+@pytest.mark.parametrize("example_path", get_example_files())
+def test_example_files_execute(example_path, mock_clients):
+    """Test that example files execute without errors"""
+    if not get_example_files():
+        pytest.skip("Examples directory not found")
+
+    print(f"Executing {os.path.basename(example_path)}")
+
+    try:
+        exec(open(example_path).read())
+    except Exception as e:
+        pytest.fail(f"Failed to execute {os.path.basename(example_path)}: {str(e)}")

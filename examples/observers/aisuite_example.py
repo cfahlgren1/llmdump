@@ -5,7 +5,7 @@ client = ai.Client()
 
 client = wrap_aisuite(client)
 
-models = ["openai:gpt-4o"]
+models = ["openai:gpt-4o", "anthropic:claude-3-5-sonnet-20240620"]
 
 messages = [
     {"role": "system", "content": "Respond in Pirate English."},
