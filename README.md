@@ -49,7 +49,7 @@ response = client.chat.completions.create(
 ### Supported Observers
 
 - [OpenAI](https://openai.com/) and every other LLM provider that implements the [OpenAI API message formate](https://platform.openai.com/docs/api-reference)
-- [AISuite](https://github.com/aisuite-ai/aisuite)
+- [AISuite](https://github.com/andrewyng/aisuite)
 ### Change OpenAI compliant LLM provider
 
 The `wrap_openai` function allows you to wrap any OpenAI compliant LLM provider. Take a look at [the example doing this for Ollama](./examples/ollama_example.py) for more details.
