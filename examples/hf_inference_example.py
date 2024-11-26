@@ -1,12 +1,12 @@
 import os
 
-from observers.observers.models.openai import wrap_openai
-from observers.stores.datasets import DatasetsStore
+from observers.observers import wrap_openai
+from observers.stores import DatasetsStore
 from openai import OpenAI
 
 store = DatasetsStore(
     repo_name="qwen-2-5-traces",
-    every=5,  # sync every 5 messages
+    every=5,  # sync every 5 minutes
     private=True,  # make the repo private
 )
 
