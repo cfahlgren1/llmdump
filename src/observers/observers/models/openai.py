@@ -164,7 +164,7 @@ class OpenAIResponseRecord(Record):
 
 def wrap_openai(
     client: OpenAI,
-    store: Optional[Union[ "DatasetsStore", DuckDBStore]] = None,
+    store: Optional[Union["DatasetsStore", DuckDBStore]] = None,
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
 ) -> OpenAI:
