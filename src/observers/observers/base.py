@@ -1,8 +1,6 @@
-import datetime
-import uuid
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from argilla import Argilla
@@ -19,14 +17,6 @@ class Record(ABC):
     """
     Base class for storing model response information
     """
-
-    id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    model: str = None
-    timestamp: str = field(default_factory=lambda: datetime.datetime.now().isoformat())
-    tags: List[str] = None
-    properties: Dict[str, Any] = None
-    error: Optional[str] = None
-    raw_response: Optional[Dict] = None
 
     @property
     @abstractmethod

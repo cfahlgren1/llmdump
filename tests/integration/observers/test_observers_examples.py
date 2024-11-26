@@ -1,4 +1,5 @@
 import os
+import uuid
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -21,33 +22,41 @@ def get_example_files():
     ]
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_clients():
     """Fixture providing mocked API clients"""
-    fake_return = ChatCompletion(
-        id="123",
-        choices=[
-            Choice(
-                message=ChatCompletionMessage(
-                    content="", role="assistant", tool_calls=None, audio=None
-                ),
-                finish_reason="stop",
-                index=0,
-                logprobs=None,
-            )
-        ],
-        model="gpt-4o",
-        usage=CompletionUsage(prompt_tokens=10, completion_tokens=10, total_tokens=20),
-        created=1727238800,
-        object="chat.completion",
-        system_fingerprint=None,
-    )
+
+    def get_fake_return():
+        return ChatCompletion(
+            id=str(uuid.uuid4()),
+            choices=[
+                Choice(
+                    message=ChatCompletionMessage(
+                        content="", role="assistant", tool_calls=None, audio=None
+                    ),
+                    finish_reason="stop",
+                    index=0,
+                    logprobs=None,
+                )
+            ],
+            model="gpt-4o",
+            usage=CompletionUsage(
+                prompt_tokens=10, completion_tokens=10, total_tokens=20
+            ),
+            created=1727238800,
+            object="chat.completion",
+            system_fingerprint=None,
+        )
 
     mock_openai = MagicMock()
-    mock_openai.chat.completions.create.return_value = fake_return
+    mock_openai.chat.completions.create.side_effect = (
+        lambda *args, **kwargs: get_fake_return()
+    )
 
     mock_aisuite = MagicMock()
-    mock_aisuite.chat.completions.create.return_value = fake_return
+    mock_aisuite.chat.completions.create.side_effect = (
+        lambda *args, **kwargs: get_fake_return()
+    )
 
     mocks = {
         "openai.OpenAI": patch("openai.OpenAI", return_value=mock_openai),
