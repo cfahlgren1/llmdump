@@ -40,12 +40,12 @@ class DatasetsStore(Store):
         except Exception:
             login()
 
-        self._temp_dir = tempfile.mkdtemp(prefix="observers_dataset_")
-
         if self.folder_path is None:
+            self._temp_dir = tempfile.mkdtemp(prefix="observers_dataset_")
             self.folder_path = self._temp_dir
-
-        atexit.register(self._cleanup)
+            atexit.register(self._cleanup)
+        else:
+            os.makedirs(self.folder_path, exist_ok=True)
 
     def _cleanup(self):
         """Clean up temporary directory on exit"""

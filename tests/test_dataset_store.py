@@ -44,10 +44,16 @@ def test_folder_path_defaults_to_temp_dir(datasets_store):
     assert datasets_store.folder_path == datasets_store._temp_dir
 
 
-def test_custom_folder_path(mock_whoami, mock_login):
-    """Test that custom folder_path is respected"""
-    custom_path = "/custom/path"
+def test_custom_folder_path(mock_whoami, mock_login, tmp_path):
+    """Test that custom folder_path is respected and not deleted during cleanup"""
+    custom_path = str(tmp_path / "custom_datasets")
+    os.makedirs(custom_path, exist_ok=True)
+
     store = DatasetsStore(folder_path=custom_path)
     assert store.folder_path == custom_path
-    assert store._temp_dir != custom_path
+    assert store._temp_dir is None
+
     store._cleanup()
+    assert os.path.exists(
+        custom_path
+    ), "Custom folder should not be deleted during cleanup"
