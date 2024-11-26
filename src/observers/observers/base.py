@@ -40,7 +40,3 @@ class Record(ABC):
     def argilla_settings(self, client: "Argilla"):
         """Return the Argilla settings for the record"""
         pass
-
-
-def ChatCompletionRecord(Record):
-    pass
