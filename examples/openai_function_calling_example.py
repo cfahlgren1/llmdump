@@ -26,19 +26,19 @@ tools = [
                 "required": ["order_id"],
                 "additionalProperties": False,
             },
-        }
+        },
     }
 ]
 
 messages = [
     {
         "role": "system",
-        "content": "You are a helpful customer support assistant. Use the supplied tools to assist the user."
+        "content": "You are a helpful customer support assistant. Use the supplied tools to assist the user.",
     },
     {
         "role": "user",
-        "content": "Hi, can you tell me the delivery date for my order? It's order 1234567890."
-    }
+        "content": "Hi, can you tell me the delivery date for my order? It's order 1234567890.",
+    },
 ]
 
 
