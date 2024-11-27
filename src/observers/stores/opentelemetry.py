@@ -88,9 +88,9 @@ class OpenTelemetryStore(Store):
                 span.set_attribute("messages", messages)
 
     @classmethod
-    def connect(cls, api_key=None, dataset=None, api_host=None):
+    def connect(cls):
         """Alternate constructor for OpenTelemetryStore"""
-        tracer, connected = cls._connect(api_key, dataset, api_host)
+        tracer, connected = cls._connect()
         return cls(tracer, connected)
 
     @classmethod
