@@ -1,7 +1,7 @@
 [project]
 name = "observers"
-version = "0.1.2"
-description = "🤗 Observers: A lightweight library for (generative) AI observability, enabling insights into model interactions and everything that comes with it."
+version = "0.1.3"
+description = "🤗 Observers: A Lightweight Library for AI Observability"
 authors = [
     {name = "davidberenstein1957", email = "david.m.berenstein@gmail.com"},
 ]
