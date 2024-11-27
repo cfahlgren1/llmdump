@@ -58,9 +58,12 @@ def mock_clients():
         lambda *args, **kwargs: get_fake_return()
     )
 
+    mock_litellm = MagicMock(side_effect=lambda *args, **kwargs: get_fake_return())
+
     mocks = {
         "openai.OpenAI": patch("openai.OpenAI", return_value=mock_openai),
         "aisuite.Client": patch("aisuite.Client", return_value=mock_aisuite),
+        "litellm.completion": patch("litellm.completion", mock_litellm),
     }
 
     for mock in mocks.values():
