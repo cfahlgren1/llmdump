@@ -38,6 +38,9 @@ dev = [
     "black>=24.10.0",
     "jinja2>=3.1.4",
 ]
+litellm = [
+    "litellm>=1.52",
+]
 
 [build-system]
 requires = ["pdm-backend"]
