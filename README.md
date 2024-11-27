@@ -74,6 +74,7 @@ The `wrap_openai` function allows you to wrap any OpenAI compliant LLM provider.
 | [Argilla](https://argilla.io/) | [example](./examples/argilla_example.py) | ✅ | ❌ | ✅ | ✅ | ❌ |
 | [OpenTelemetry](https://opentelemetry.io/) | [example](./examples/stores/opentelemetry_example.py) | ︖* | ︖* | ︖* | ︖* | ︖* |
 | [Honeycomb](https://honeycomb.io/) | [example](./examples/stores/opentelemetry_example.py) | ✅ |❌| ✅ | ✅ | ✅ |
+* These features, for the OpenTelemetry store, depend upon the provider you use
 
 ### Viewing / Querying
 
