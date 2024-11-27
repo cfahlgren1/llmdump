@@ -2,11 +2,7 @@ from observers.observers import wrap_openai
 from observers.stores import DatasetsStore
 from openai import OpenAI
 
-store = DatasetsStore(
-    repo_name="gpt-4o-mini-vision-traces",
-    every=5,  # sync every 5 messages
-)
-
+store = DatasetsStore(repo_name="test-repo-json-messages")
 openai_client = OpenAI()
 client = wrap_openai(openai_client, store=store)
 
