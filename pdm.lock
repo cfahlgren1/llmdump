@@ -5,7 +5,7 @@
 groups = ["default", "aisuite", "dev", "litellm"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:d1b14f292863311bee754caa9dbd4c9e24422780b85d56889393bf0dc8964745"
+content_hash = "sha256:a8657db6d0a4435157eb027b72a90b8df92edf7836f6823fe58609ab5becab81"
 
 [[metadata.targets]]
 requires_python = ">=3.10,<3.13"
