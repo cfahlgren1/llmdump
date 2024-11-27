@@ -1,10 +1,8 @@
 from observers.observers import wrap_openai
-from observers.stores import DatasetsStore
 from openai import OpenAI
 
-store = DatasetsStore(repo_name="test-repo-json-messages")
 openai_client = OpenAI()
-client = wrap_openai(openai_client, store=store)
+client = wrap_openai(openai_client)
 
 response = client.chat.completions.create(
     model="gpt-4o-mini",
