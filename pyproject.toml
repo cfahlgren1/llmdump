@@ -43,6 +43,11 @@ litellm = [
 ]
 docling = [
     "docling>=2.8.0",
+opentelemetry = [
+    "opentelemetry-api>=1.28.0",
+    "opentelemetry-sdk>=1.28.0",
+    "opentelemetry-exporter-otlp-proto-grpc>=1.28.0",
+]
 
 [build-system]
 requires = ["pdm-backend"]
