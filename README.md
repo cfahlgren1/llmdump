@@ -16,10 +16,10 @@ First things first! You can install the SDK with pip as follows:
 pip install observers
 ```
 
-Or if you want to use AISuite, you can install the SDK with pip as follows:
+Or if you want to use other LLM providers through AISuite or Litellm, you can install the SDK with pip as follows:
 
 ```bash
-pip install observers[aisuite]
+pip install observers[aisuite] # or observers[litellm]
 ```
 
 ## Usage
