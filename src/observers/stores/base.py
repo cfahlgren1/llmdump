@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from observers.observers.base import Record
+if TYPE_CHECKING:
+    from observers.observers.base import Record
 
 
 @dataclass
@@ -11,7 +13,7 @@ class Store(ABC):
     """
 
     @abstractmethod
-    def add(self, record: Record):
+    def add(self, record: "Record"):
         """Add a new record to the store"""
         pass
 

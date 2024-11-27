@@ -1,11 +1,11 @@
-from observers.observers.models.openai import wrap_openai
-from observers.stores.datasets import DatasetsStore
+from observers.observers import wrap_openai
+from observers.stores import ArgillaStore
 from openai import OpenAI
 
-store = DatasetsStore(
-    repo_name="gpt-4o-traces",
-    every=5,  # sync every 5 messages
-)
+api_url = "<argilla-api-url>"
+api_key = "<argilla-api-key>"
+
+store = ArgillaStore(api_url=api_url, api_key=api_key)
 
 openai_client = OpenAI()
 

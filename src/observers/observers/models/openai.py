@@ -4,12 +4,13 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from observers.observers.base import Message, Record
-from observers.stores.datasets import DatasetsStore
-from openai import OpenAI
+from observers.stores.duckdb import DuckDBStore
 
 if TYPE_CHECKING:
     from argilla import Argilla
-    from observers.stores.duckdb import DuckDBStore
+    from openai import OpenAI
+
+    from observers.stores.datasets import DatasetsStore
 
 
 @dataclass
@@ -163,11 +164,11 @@ class OpenAIResponseRecord(Record):
 
 
 def wrap_openai(
-    client: OpenAI,
-    store: Optional[Union["DuckDBStore", DatasetsStore]] = None,
+    client: "OpenAI",
+    store: Optional[Union["DatasetsStore", DuckDBStore]] = None,
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
-) -> OpenAI:
+) -> "OpenAI":
     """
     Wrap OpenAI client to track API calls in a Store.
 
@@ -178,7 +179,7 @@ def wrap_openai(
         properties: Optional dictionary of properties to associate with records
     """
     if store is None:
-        store = DatasetsStore.connect()
+        store = DuckDBStore.connect()
 
     original_create = client.chat.completions.create
 

@@ -1,8 +1,5 @@
-from observers.observers.models.openai import wrap_openai
-from observers.stores.duckdb import DuckDBStore
+from observers.observers import wrap_openai
 from openai import OpenAI
-
-store = DuckDBStore()
 
 # Ollama is running locally at http://localhost:11434/v1
 openai_client = OpenAI(
@@ -12,7 +9,7 @@ openai_client = OpenAI(
     api_key='unused'
 )
 
-client = wrap_openai(openai_client, store=store)
+client = wrap_openai(openai_client)
 
 response = client.chat.completions.create(
     model="llama3.1",

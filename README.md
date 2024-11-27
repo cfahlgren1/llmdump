@@ -16,6 +16,12 @@ First things first! You can install the SDK with pip as follows:
 pip install observers
 ```
 
+Or if you want to use other LLM providers through AISuite or Litellm, you can install the SDK with pip as follows:
+
+```bash
+pip install observers[aisuite] # or observers[litellm]
+```
+
 ## Usage
 
 We differentiate between observers and stores. Observers wrap generative AI APIs (like OpenAI or llama-index) and track their interactions. Stores are classes that sync these observations to different storage backends (like DuckDB or Hugging Face datasets).
@@ -23,8 +29,8 @@ We differentiate between observers and stores. Observers wrap generative AI APIs
 To get started you can run the code below. It sends requests to a HF serverless endpoint and log the interactions into a Hub dataset, using the default store `DatasetsStore`. The dataset will be pushed to your personal workspace (http://hf.co/{your_username}). To learn how to configure stores, go to the next section.
 
 ```python
-from observers.observers.models.openai import wrap_openai
-from observers.stores.duckdb import DuckDBStore
+from observers.observers import wrap_openai
+from observers.stores import DuckDBStore
 from openai import OpenAI
 
 store = DuckDBStore()
@@ -43,6 +49,7 @@ response = client.chat.completions.create(
 ### Supported Observers
 
 - [OpenAI](https://openai.com/) and every other LLM provider that implements the [OpenAI API message formate](https://platform.openai.com/docs/api-reference)
+- [AISuite](https://github.com/andrewyng/aisuite), which is an LLM router by Andrew Ng and which maps to [a lot of LLM API providers](https://github.com/andrewyng/aisuite/tree/main/aisuite/providers) with a uniform interface.
 
 ### Change OpenAI compliant LLM provider
 

@@ -1,10 +1,10 @@
-from observers.observers.models.openai import wrap_openai
-from observers.stores.datasets import DatasetsStore
+from observers.observers import wrap_openai
+from observers.stores import DatasetsStore
 from openai import OpenAI
 
 store = DatasetsStore(
     repo_name="gpt-4o-function-calling-traces",
-    every=5,  # sync every 5 messages
+    every=5,  # sync every 5 minutes
 )
 
 openai_client = OpenAI()
@@ -26,19 +26,19 @@ tools = [
                 "required": ["order_id"],
                 "additionalProperties": False,
             },
-        }
+        },
     }
 ]
 
 messages = [
     {
         "role": "system",
-        "content": "You are a helpful customer support assistant. Use the supplied tools to assist the user."
+        "content": "You are a helpful customer support assistant. Use the supplied tools to assist the user.",
     },
     {
         "role": "user",
-        "content": "Hi, can you tell me the delivery date for my order? It's order 1234567890."
-    }
+        "content": "Hi, can you tell me the delivery date for my order? It's order 1234567890.",
+    },
 ]
 
 
