@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from observers.observers.models.openai import OpenAIResponseRecord
@@ -8,17 +7,6 @@ if TYPE_CHECKING:
     from aisuite import Client
 
     from observers.stores.datasets import DatasetsStore
-
-
-@dataclass
-class AISuiteResponseRecord(OpenAIResponseRecord):
-    """
-    Data class for storing AISuite API response information
-    """
-
-    @property
-    def table_name(self):
-        return "aisuite_records"
 
 
 # copy of openai wrap
@@ -46,7 +34,7 @@ def wrap_aisuite(
         try:
             response = original_create(*args, **kwargs)
 
-            entry = AISuiteResponseRecord.create(
+            entry = OpenAIResponseRecord.create(
                 response=response,
                 messages=kwargs.get("messages"),
                 model=kwargs.get("model"),
@@ -57,7 +45,7 @@ def wrap_aisuite(
             return response
 
         except Exception as e:
-            entry = AISuiteResponseRecord.create(
+            entry = OpenAIResponseRecord.create(
                 error=e,
                 messages=kwargs.get("messages"),
                 model=kwargs.get("model"),
