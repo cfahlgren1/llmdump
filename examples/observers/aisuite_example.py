@@ -5,6 +5,7 @@ client = ai.Client()
 
 client = wrap_aisuite(client)
 
+# ensure you have both `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` environment variables set
 models = ["openai:gpt-4o", "anthropic:claude-3-5-sonnet-20240620"]
 
 messages = [
