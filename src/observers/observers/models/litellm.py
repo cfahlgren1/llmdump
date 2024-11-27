@@ -1,22 +1,10 @@
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
-from observers.observers.models.openai import OpenAIResponseRecord
+from observers.observers.models.openai import wrap_openai
 from observers.stores.duckdb import DuckDBStore
 
 if TYPE_CHECKING:
     from observers.stores.datasets import DatasetsStore
-
-
-@dataclass
-class LitellmResponseRecord(OpenAIResponseRecord):
-    """
-    Data class for storing AISuite API response information
-    """
-
-    @property
-    def table_name(self) -> Literal["litellm_records"]:
-        return "litellm_records"
 
 
 # copy of openai wrap
@@ -27,43 +15,33 @@ def wrap_litellm(
     properties: Optional[Dict[str, Any]] = None,
 ) -> Callable:
     """
-    Wrap OpenAI client to track API calls in a Store.
+    Wrap Litellm completion function to track API calls in a Store.
 
     Args:
-        client: OpenAI client instance
+        client: Litellm completion function
         store: Store instance for persistence. Creates new if None
         tags: Optional list of tags to associate with records
         properties: Optional dictionary of properties to associate with records
     """
-    if store is None:
-        store = DuckDBStore.connect()
 
-    original_create = client
+    # Create a mock OpenAI-like client structure
+    class ChatCompletions:
+        def __init__(self, create_fn):
+            self.create = create_fn
 
-    def tracked_create(*args, **kwargs):
-        try:
-            response = original_create(*args, **kwargs)
+    class Chat:
+        def __init__(self, completions):
+            self.completions = completions
 
-            entry = LitellmResponseRecord.create(
-                response=response,
-                messages=kwargs.get("messages"),
-                model=kwargs.get("model"),
-                tags=tags or [],
-                properties=properties,
-            )
-            store.add(entry)
-            return response
+    class MockClient:
+        def __init__(self, chat):
+            self.chat = chat
 
-        except Exception as e:
-            entry = LitellmResponseRecord.create(
-                error=e,
-                messages=kwargs.get("messages"),
-                model=kwargs.get("model"),
-                tags=tags or [],
-                properties=properties,
-            )
-            store.add(entry)
-            raise
+        def __call__(self, *args, **kwargs):
+            return client(*args, **kwargs)
 
-    client = tracked_create
-    return client
+    # Set up the wrapped client with OpenAI-like structure
+    tracked_client = MockClient(
+        Chat(ChatCompletions(wrap_openai(client, store, tags, properties)))
+    )
+    return tracked_client

@@ -3,7 +3,7 @@ import os
 from litellm import completion
 from observers.observers.models.litellm import wrap_litellm
 
-## set ENV variables
+# ensure you have both `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` environment variables set
 os.environ["OPENAI_API_KEY"] = "your-api-key"
 os.environ["ANTHROPIC_API_KEY"] = "your-api-key"
 
