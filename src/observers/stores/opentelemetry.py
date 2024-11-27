@@ -17,7 +17,6 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 
 
-OTEL_NAMESPACE = "huggingface.co/observers"
 
 
 def flatten_dict(d, prefix=""):
@@ -53,23 +52,35 @@ class OpenTelemetryStore(Store):
     # but, set here as well.
     tracer: Optional[Tracer] = None
     root_span: Optional[Span] = None
-    connected: bool = False
+    namespace: str = "observers.dev/observers"
 
     def __post_init__(self):
-        # if we weren't called by the `connect` constructor, we still need to
-        # `connect`, and the example construction uses the ObjectName() syntax
-        if not self.connected:
-            self.tracer, self.connected = OpenTelemetryStore._connect()
-        # if we initialize a span here, then all subsequent 'add's can be
-        # added to a continuous trace
-        with self.tracer.start_as_current_span(f"{OTEL_NAMESPACE}.init") as span:
-            span.set_attribute("connected", True)
-            self.root_span = span
+        if not self.tracer:
+            provider = TracerProvider(
+                resource=Resource.create(
+                    {
+                        "instrument.name": self.namespace,
+                        "instrument.version": get_version(),
+                    }
+                ),
+            )
+            if not self.exporter:
+                provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
+            else:
+                provider.add_span_processor(BatchSpanProcessor(self.exporter))
+            trace.set_tracer_provider(provider)
+            self.tracer = trace.get_tracer(self.namespace)
+        if not self.root_span:
+            # if we initialize a span here, then all subsequent 'add's can be
+            # added to a continuous trace
+            with self.tracer.start_as_current_span(f"{self.namespace}.init") as span:
+                span.set_attribute("connected", True)
+                self.root_span = span
 
     def add(self, record: Record):
         """Add a new record to the store"""
         with trace.use_span(self.root_span):
-            with self.tracer.start_as_current_span(f"{OTEL_NAMESPACE}.add") as span:
+            with self.tracer.start_as_current_span(f"{self.namespace}.add") as span:
                 # Split out to be easily edited if the record api changes
                 event_fields = [
                     "assistant_message",
@@ -100,27 +111,10 @@ class OpenTelemetryStore(Store):
                 span.set_attribute("messages", messages)
 
     @classmethod
-    def connect(cls):
-        """Alternate constructor for OpenTelemetryStore"""
-        tracer, connected = cls._connect()
-        return cls(tracer, connected)
-
-    @classmethod
-    def _connect(cls):
-        """Connect to the OpenTelemetry endpoint"""
-        provider = TracerProvider(
-            resource=Resource.create(
-                {
-                    "instrument.name": OTEL_NAMESPACE,
-                    "instrument.version": get_version(),
-                }
-            ),
-        )
-        provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
-        trace.set_tracer_provider(provider)
-        tracer = trace.get_tracer(OTEL_NAMESPACE)
-        connected = True
-        return (tracer, connected)
+    def connect(cls, tracer=None, root_span=None, namespace=None, exporter=None):
+        """Create an ObservabilityStore, optionally starting from a prior tracer or trace,
+           assigning a custom namespace, or setting an alternate exporter"""
+        return cls(tracer, root_span, namespace, exporter)
 
     def _init_table(self, record: "Record"):
         """Initialize the dataset (no op)"""
