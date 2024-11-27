@@ -5,10 +5,11 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from observers.observers.base import Message, Record
 from observers.stores.duckdb import DuckDBStore
-from openai import OpenAI
 
 if TYPE_CHECKING:
     from argilla import Argilla
+    from openai import OpenAI
+
     from observers.stores.datasets import DatasetsStore
 
 
@@ -163,11 +164,11 @@ class OpenAIResponseRecord(Record):
 
 
 def wrap_openai(
-    client: OpenAI,
+    client: "OpenAI",
     store: Optional[Union["DatasetsStore", DuckDBStore]] = None,
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
-) -> OpenAI:
+) -> "OpenAI":
     """
     Wrap OpenAI client to track API calls in a Store.
 

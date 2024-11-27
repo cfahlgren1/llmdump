@@ -26,8 +26,17 @@ dependencies = [
     "duckdb>=1.0.0",
     "datasets>=3.0.0",
     "openai>=1.50.0",
-    "litellm>=1.50.0",
-    "argilla>=2.0.0",
+    "argilla>=2.3.0",
+]
+
+[project.optional-dependencies]
+aisuite = [
+    "aisuite[all]>=0.1.6",
+]
+dev = [
+    "pytest>=8.3.3",
+    "black>=24.10.0",
+    "jinja2>=3.1.4",
 ]
 
 [build-system]
@@ -37,11 +46,3 @@ build-backend = "pdm.backend"
 
 [tool.pdm]
 distribution = true
-
-[dependency-groups]
-test = [
-    "pytest>=8.3.3",
-]
-lint = [
-    "black>=24.10.0",
-]
