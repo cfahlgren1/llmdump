@@ -43,7 +43,6 @@ litellm = [
 ]
 docling = [
     "docling>=2.8.0",
-]
 
 [build-system]
 requires = ["pdm-backend"]
