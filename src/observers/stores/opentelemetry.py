@@ -1,6 +1,7 @@
 # stdlib features
 from dataclasses import dataclass
 from typing import Optional
+from importlib.metadata import PackageNotFoundError, version
 
 # Observers internal interfaces
 from observers.observers.base import Record
@@ -12,7 +13,11 @@ from opentelemetry.sdk.trace import TracerProvider, Tracer, Span
 from opentelemetry.sdk.trace.export import (
     BatchSpanProcessor,
 )
+from opentelemetry.sdk.resources import Resource
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+
+
+OTEL_NAMESPACE = "huggingface.co/observers"
 
 
 def flatten_dict(d, prefix=""):
@@ -28,6 +33,13 @@ def flatten_dict(d, prefix=""):
                     flat[(f"{prefix}.{k}")] = v
                 else:
                     flat[k] = v
+
+
+def get_version():
+    try:
+        return version("observers")
+    except PackageNotFoundError:
+        return "unknown"
 
 
 @dataclass
@@ -50,14 +62,14 @@ class OpenTelemetryStore(Store):
             self.tracer, self.connected = OpenTelemetryStore._connect()
         # if we initialize a span here, then all subsequent 'add's can be
         # added to a continuous trace
-        with self.tracer.start_as_current_span("observers.init") as span:
+        with self.tracer.start_as_current_span(f"{OTEL_NAMESPACE}.init") as span:
             span.set_attribute("connected", True)
             self.root_span = span
 
     def add(self, record: Record):
         """Add a new record to the store"""
         with trace.use_span(self.root_span):
-            with self.tracer.start_as_current_span("observers.add") as span:
+            with self.tracer.start_as_current_span(f"{OTEL_NAMESPACE}.add") as span:
                 # Split out to be easily edited if the record api changes
                 event_fields = [
                     "assistant_message",
@@ -96,10 +108,17 @@ class OpenTelemetryStore(Store):
     @classmethod
     def _connect(cls):
         """Connect to the OpenTelemetry endpoint"""
-        provider = TracerProvider()
+        provider = TracerProvider(
+            resource=Resource.create(
+                {
+                    "instrument.name": OTEL_NAMESPACE,
+                    "instrument.version": get_version(),
+                }
+            ),
+        )
         provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
         trace.set_tracer_provider(provider)
-        tracer = trace.get_tracer("huggingface.co/observers")
+        tracer = trace.get_tracer(OTEL_NAMESPACE)
         connected = True
         return (tracer, connected)
 
