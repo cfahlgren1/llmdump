@@ -10,9 +10,7 @@ from observers.stores.base import Store
 # Actual dependencies
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider, Tracer, Span
-from opentelemetry.sdk.trace.export import (
-    BatchSpanProcessor, SpanExporter
-)
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, SpanExporter
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 

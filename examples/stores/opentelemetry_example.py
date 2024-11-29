@@ -12,10 +12,7 @@ from openai import OpenAI
 
 store = OpenTelemetryStore()
 
-openai_client = OpenAI(
-        base_url="http://localhost:11434/v1",
-        api_key="unused"
-        )
+openai_client = OpenAI(base_url="http://localhost:11434/v1", api_key="unused")
 
 client = wrap_openai(openai_client, store=store)
 
