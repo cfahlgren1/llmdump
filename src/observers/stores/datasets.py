@@ -32,7 +32,7 @@ class DatasetsStore(Store):
     token: Optional[str] = field(default=None)
     allow_patterns: Optional[List[str]] = field(default=None)
     ignore_patterns: Optional[List[str]] = field(default=None)
-    squash_history: Optional[bool] = field(default=True)
+    squash_history: Optional[bool] = field(default=None)
 
     _filename: Optional[str] = field(default=None)
     _scheduler: Optional[CommitScheduler] = None
@@ -185,6 +185,7 @@ class DatasetsStore(Store):
                     raise
 
             # Create/update metadata.jsonl by combining all .json files
+            # https://huggingface.co/docs/datasets/en/image_dataset#imagefolder
             metadata_path = self._scheduler.folder_path / "metadata.jsonl"
 
             # Find all .json files in the directory
