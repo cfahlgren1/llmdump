@@ -58,6 +58,7 @@ response = client.chat.completions.create(
 - [AISuite](https://github.com/andrewyng/aisuite), which is an LLM router by Andrew Ng and which maps to [a lot of LLM API providers](https://github.com/andrewyng/aisuite/tree/main/aisuite/providers) with a uniform interface.
 - [Litellm](https://docs.litellm.ai/docs/), which is a library that allows you to use a lot of different LLM APIs with a uniform interface.
 - [Docling](https://github.com/docling/docling), which is a document intelligence platform that can be used to wrap generative AI APIs that interact with documents.
+
 ### Change OpenAI compliant LLM provider
 
 The `wrap_openai` function allows you to wrap any OpenAI compliant LLM provider. Take a look at [the example doing this for Ollama](./examples/ollama_example.py) for more details.
