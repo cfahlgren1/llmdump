@@ -53,7 +53,7 @@ response = client.chat.completions.create(
 
 ### Change OpenAI compliant LLM provider
 
-The `wrap_openai` function allows you to wrap any OpenAI compliant LLM provider. Take a look at [the example doing this for Ollama](./examples/ollama_example.py) for more details.
+The `wrap_openai` function allows you to wrap any OpenAI compliant LLM provider. Take a look at [the example doing this for Ollama](./examples/observers/ollama_example.py) for more details.
 
 ## Stores
 
