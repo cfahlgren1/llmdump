@@ -58,9 +58,17 @@ class DuckDBStore(Store):
             if record_dict[json_field]:
                 record_dict[json_field] = json.dumps(record_dict[json_field])
 
+<<<<<<< HEAD
         placeholders = ", ".join(
             ["$" + str(i + 1) for i in range(len(record.table_columns))]
         )
+=======
+        for image_field in record.image_fields:
+            if record_dict[image_field]:
+                record_dict[image_field] = record_dict[image_field].tobytes()
+
+        placeholders = ", ".join(["$" + str(i + 1) for i in range(len(record_dict))])
+>>>>>>> 83ad78b (add docling example)
 
         # Sort record_dict based on table_columns order
         if hasattr(record, "table_columns"):

@@ -1,8 +1,16 @@
 import base64
+<<<<<<< HEAD
 import warnings
 from dataclasses import dataclass
 from io import BytesIO
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
+=======
+from dataclasses import dataclass
+from io import BytesIO
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+
+from PIL import Image
+>>>>>>> 83ad78b (add docling example)
 
 from observers.observers.base import Record
 from observers.stores.duckdb import DuckDBStore
@@ -35,7 +43,11 @@ class DoclingRecord(Record):
     label: str = None
     filename: str = None
     page_no: int = 0
+<<<<<<< HEAD
     image: Optional[Dict[str, Any]] = None
+=======
+    image: Optional[Image.Image] = None
+>>>>>>> 83ad78b (add docling example)
     mimetype: Optional[str] = None
     dpi: Optional[int] = None
     width: Optional[int] = None
@@ -66,6 +78,7 @@ class DoclingRecord(Record):
         data["label"] = docling_object.label.value
         # get image info
         if hasattr(docling_object, "image"):
+<<<<<<< HEAD
             image = docling_object.image.pil_image
             docling_object.image.uri = None
         else:
@@ -82,6 +95,23 @@ class DoclingRecord(Record):
             image.save(buffered, format="PNG")
             img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
             data["image"] = {"bytes": img_str, "path": None}
+=======
+            data["image"] = docling_object.image.pil_image
+        else:
+            data["image"] = docling_object.get_image(document)
+        if data["image"]:
+            data["mimetype"] = "image/png"  # PIL images are saved as PNG
+            data["dpi"] = data["image"].info.get(
+                "dpi", 72
+            )  # Default to 72 DPI if not specified
+            data["width"] = data["image"].width
+            data["height"] = data["image"].height
+            # Create data URI for the image
+            buffered = BytesIO()
+            data["image"].save(buffered, format="PNG")
+            img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+            data["uri"] = f"data:image/png;base64,{img_str}"
+>>>>>>> 83ad78b (add docling example)
 
         # get caption or text
         if hasattr(docling_object, "caption_text") and callable(
@@ -93,7 +123,10 @@ class DoclingRecord(Record):
         ):
             data["text"] = docling_object.export_to_document_tokens(document)
         data["text_length"] = len(data["text"])
+<<<<<<< HEAD
 
+=======
+>>>>>>> 83ad78b (add docling example)
         data["raw_response"] = docling_object.model_dump(mode="json")
         return cls(**data, tags=tags, properties=properties, error=error)
 
@@ -113,6 +146,7 @@ class DoclingRecord(Record):
     def table_columns(self):
         return [
             "id",
+<<<<<<< HEAD
             "filename",
             "label",
             "text",
@@ -125,6 +159,21 @@ class DoclingRecord(Record):
             "page_no",
             "mime_type",
             "version",
+=======
+            "version",
+            "mime_type",
+            "page_no",
+            "image",
+            "filename",
+            "label",
+            "mimetype",
+            "dpi",
+            "width",
+            "height",
+            "uri",
+            "text",
+            "text_length",
+>>>>>>> 83ad78b (add docling example)
             "tags",
             "properties",
             "error",
@@ -137,6 +186,7 @@ class DoclingRecord(Record):
         return f"""
         CREATE TABLE IF NOT EXISTS {self.table_name} (
             id VARCHAR PRIMARY KEY,
+<<<<<<< HEAD
             filename VARCHAR,
             label VARCHAR,
             text VARCHAR,
@@ -149,6 +199,21 @@ class DoclingRecord(Record):
             page_no INTEGER,
             mime_type VARCHAR,
             version VARCHAR,
+=======
+            version VARCHAR,
+            mime_type VARCHAR,
+            page_no INTEGER,
+            image BLOB,
+            filename VARCHAR,
+            label VARCHAR,
+            mimetype VARCHAR,
+            dpi INTEGER,
+            width INTEGER,
+            height INTEGER,
+            uri VARCHAR,
+            text VARCHAR,
+            text_length INTEGER,
+>>>>>>> 83ad78b (add docling example)
             tags VARCHAR[],
             properties JSON,
             error VARCHAR,
@@ -267,6 +332,7 @@ def wrap_docling(
         raise ValueError(f"Invalid media type: {media_types}")
 
     original_convert = client.convert
+<<<<<<< HEAD
     original_convert_all = client.convert_all
 
     def process_document(document, page_no, page) -> None:
@@ -310,11 +376,14 @@ def wrap_docling(
                     store.add(record)
                 except Exception as e:
                     warnings.warn(f"Error creating record for {docling_object}: {e}")
+=======
+>>>>>>> 83ad78b (add docling example)
 
     def convert(*args, **kwargs) -> "DoclingDocument":
         result = original_convert(*args, **kwargs)
         document = result.document
         for page_no, page in enumerate(document.pages):
+<<<<<<< HEAD
             process_document(document, page_no, page)
         return result
 
@@ -328,4 +397,44 @@ def wrap_docling(
 
     client.convert = convert
     client.convert_all = convert_all
+=======
+            for docling_object, _level in document.iterate_items(page_no=page_no):
+                if (
+                    isinstance(docling_object, (SectionHeaderItem, ListItem, TextItem))
+                    and "texts" in media_types
+                ):
+                    record = DoclingRecord.create(
+                        docling_object=docling_object,
+                        document=document,
+                        page=page,
+                        tags=tags,
+                        properties=properties,
+                    )
+                    store.add(record)
+                if (
+                    isinstance(docling_object, PictureItem)
+                    and "pictures" in media_types
+                ):
+                    record = DoclingRecord.create(
+                        docling_object=docling_object,
+                        document=document,
+                        page=page,
+                        tags=tags,
+                        properties=properties,
+                    )
+                    store.add(record)
+                if isinstance(docling_object, TableItem) and "tables" in media_types:
+                    record = DoclingRecord.create(
+                        docling_object=docling_object,
+                        document=document,
+                        page=page,
+                        tags=tags,
+                        properties=properties,
+                    )
+                    store.add(record)
+
+        return record
+
+    client.convert = convert
+>>>>>>> 83ad78b (add docling example)
     return client
