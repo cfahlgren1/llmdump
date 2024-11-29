@@ -18,30 +18,32 @@ if TYPE_CHECKING:
     from observers.observers.base import Record
 
 
-def push_to_hub(self, *args, **kwargs):
+def push_to_hub(self):
     """Push pending changes to the Hugging Face Hub"""
+    with self.lock:
+        data = []
+        for json_file in Path(self.folder_path).rglob("*.json"):
+            with open(json_file) as f:
+                for line in f:
+                    data.append(json.loads(line))
 
-    data = []
-    for json_file in Path(self.folder_path).rglob("*.json"):
-        with open(json_file) as f:
-            for line in f:
-                data.append(json.loads(line))
+        dataset = Dataset.from_list(data)
+        if "file_name" in dataset.column_names:
 
-    dataset = Dataset.from_list(data)
-    if "file_name" in dataset.column_names:
+            def add_image_from_file_name(batch: List[Dict]):
+                batch["image"] = [
+                    Image.open(Path(self.folder_path) / file_name)
+                    for file_name in batch["file_name"]
+                ]
+                return batch
 
-        def add_image_from_file_name(batch: List[Dict]):
-            batch["image"] = [
-                Image.open(Path(self.folder_path) / file_name)
-                for file_name in batch["file_name"]
-            ]
-            return batch
+            dataset = dataset.map(add_image_from_file_name, batched=True)
+            dataset = dataset.remove_columns(["file_name"])
+            dataset = dataset.rename_column("image", "file_name")
 
-        dataset = dataset.map(add_image_from_file_name, batched=True)
-        dataset = dataset.remove_columns(["file_name"])
-        dataset = dataset.rename_column("image", "file_name")
-
-    dataset.push_to_hub(repo_id=self.repo_id, token=self.token, private=self.private)
+        dataset.push_to_hub(
+            repo_id=self.repo_id, token=self.token, private=self.private
+        )
 
 
 CommitScheduler.push_to_hub = push_to_hub
