@@ -42,8 +42,6 @@ class DatasetsStore(Store):
         """Initialize the store and create temporary directory"""
         if self.ignore_patterns is None:
             self.ignore_patterns = ["*.json"]
-        else:
-            self.ignore_patterns.append("*.json")
 
         try:
             whoami(token=self.token or os.getenv("HF_TOKEN"))
