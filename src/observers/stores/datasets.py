@@ -31,7 +31,7 @@ class DatasetsStore(Store):
     token: Optional[str] = field(default=None)
     allow_patterns: Optional[List[str]] = field(default=None)
     ignore_patterns: Optional[List[str]] = field(default=None)
-    squash_history: Optional[bool] = field(default=None)
+    squash_history: Optional[bool] = field(default=True)
 
     _filename: Optional[str] = field(default=None)
     _scheduler: Optional[CommitScheduler] = None
@@ -39,6 +39,11 @@ class DatasetsStore(Store):
 
     def __post_init__(self):
         """Initialize the store and create temporary directory"""
+        if self.ignore_patterns is None:
+            self.ignore_patterns = ["*.json"]
+        else:
+            self.ignore_patterns.append("*.json")
+
         try:
             whoami(token=self.token or os.getenv("HF_TOKEN"))
         except Exception:
@@ -80,6 +85,7 @@ class DatasetsStore(Store):
             repo_id=repo_id,
             metadata={"tags": ["observers", record.table_name.split("_")[0]]},
             repo_type="dataset",
+            token=self.token,
         )
 
     @classmethod
@@ -149,7 +155,32 @@ class DatasetsStore(Store):
                             Path(image_folder.name) / image_file_name
                         )
 
+                        record_dict["file_name"] = record_dict[image_field]
+
+                if image_field in record_dict:
+                    record_dict.pop(image_field)
                 if "uri" in record_dict:
                     record_dict.pop("uri")
 
-                f.write(json.dumps(record_dict))
+                try:
+                    f.write(
+                        json.dumps(record_dict) + "\n"
+                    )  # Add newline between records
+                    f.flush()  # Ensure data is written to disk
+                except Exception as e:
+                    print(f"Failed to write record: {str(e)}")
+                    raise
+
+            # Create/update metadata.jsonl by combining all .json files
+            metadata_path = self._scheduler.folder_path / "metadata.jsonl"
+
+            # Find all .json files in the directory
+            json_files = list(self._scheduler.folder_path.glob("*.json"))
+
+            # Combine contents of all .json files into metadata.jsonl
+            with metadata_path.open("w") as metadata_file:
+                for json_file in json_files:
+                    with json_file.open() as f:
+                        for line in f:
+                            metadata_file.write(line)
+                metadata_file.flush()
