@@ -1,4 +1,5 @@
 import base64
+import warnings
 from dataclasses import dataclass
 from io import BytesIO
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
@@ -278,32 +279,41 @@ def wrap_docling(
                 isinstance(docling_object, (SectionHeaderItem, ListItem, TextItem))
                 and "texts" in media_types
             ):
-                record = DoclingRecord.create(
-                    docling_object=docling_object,
-                    document=document,
-                    page=page,
-                    tags=tags,
-                    properties=properties,
-                )
-                store.add(record)
+                try:
+                    record = DoclingRecord.create(
+                        docling_object=docling_object,
+                        document=document,
+                        page=page,
+                        tags=tags,
+                        properties=properties,
+                    )
+                    store.add(record)
+                except Exception as e:
+                    warnings.warn(f"Error creating record for {docling_object}: {e}")
             if isinstance(docling_object, PictureItem) and "pictures" in media_types:
-                record = DoclingRecord.create(
-                    docling_object=docling_object,
-                    document=document,
-                    page=page,
-                    tags=tags,
-                    properties=properties,
-                )
-                store.add(record)
+                try:
+                    record = DoclingRecord.create(
+                        docling_object=docling_object,
+                        document=document,
+                        page=page,
+                        tags=tags,
+                        properties=properties,
+                    )
+                    store.add(record)
+                except Exception as e:
+                    warnings.warn(f"Error creating record for {docling_object}: {e}")
             if isinstance(docling_object, TableItem) and "tables" in media_types:
-                record = DoclingRecord.create(
-                    docling_object=docling_object,
-                    document=document,
-                    page=page,
-                    tags=tags,
-                    properties=properties,
-                )
-                store.add(record)
+                try:
+                    record = DoclingRecord.create(
+                        docling_object=docling_object,
+                        document=document,
+                        page=page,
+                        tags=tags,
+                        properties=properties,
+                    )
+                    store.add(record)
+                except Exception as e:
+                    warnings.warn(f"Error creating record for {docling_object}: {e}")
 
     def convert(*args, **kwargs) -> "DoclingDocument":
         result = original_convert(*args, **kwargs)
