@@ -1,4 +1,5 @@
 import atexit
+import hashlib
 import json
 import os
 import tempfile
@@ -12,7 +13,7 @@ from huggingface_hub import CommitScheduler, login, metadata_update, whoami
 from observers.stores.base import Store
 
 if TYPE_CHECKING:
-    from observers.observers.models.base import Record
+    from observers.observers.base import Record
 
 
 @dataclass
@@ -138,15 +139,22 @@ class DatasetsStore(Store):
                         image_count = len(
                             list(self._scheduler.folder_path.glob("images_*/*.png"))
                         )
-                        folder_num = image_count // 10000
+                        folder_num = (
+                            image_count // 10000
+                        )  # 10k is the maximum per directory on GH
                         folder_name = f"images_{folder_num}"
 
                         # Create folder if it doesn't exist
                         image_folder = self._scheduler.folder_path / folder_name
                         image_folder.mkdir(exist_ok=True)
 
-                        # Save image with unique filename in appropriate folder
-                        image_file_name = f"{uuid.uuid4()}.png"
+                        # Save image with unique filename based on content
+                        filtered_dict = {
+                            k: v
+                            for k, v in sorted(record_dict.items())
+                            if k not in ["uri", image_field, "id"]
+                        }
+                        image_file_name = f"{hashlib.sha256(json.dumps(obj=filtered_dict, sort_keys=True).encode()).hexdigest()}.png"
                         image_path = image_folder / image_file_name
                         record_dict[image_field].save(image_path)
 
@@ -161,6 +169,11 @@ class DatasetsStore(Store):
                     record_dict.pop(image_field)
                 if "uri" in record_dict:
                     record_dict.pop("uri")
+
+                # Replace empty dictionaries with None
+                for key, value in record_dict.items():
+                    if value == {}:
+                        record_dict[key] = None
 
                 try:
                     f.write(
