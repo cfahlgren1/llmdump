@@ -1,10 +1,13 @@
 from dataclasses import asdict, dataclass, field
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 import argilla as rg
 from argilla import Argilla
 
 from observers.stores.base import Store
+
+if TYPE_CHECKING:
+    from observers.observers.base import Record
 
 
 @dataclass
