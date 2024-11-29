@@ -46,6 +46,9 @@ opentelemetry = [
     "opentelemetry-sdk>=1.28.0",
     "opentelemetry-exporter-otlp-proto-grpc>=1.28.0",
 ]
+docling = [
+    "docling>=2.8.0",
+]
 
 [build-system]
 requires = ["pdm-backend"]
