@@ -68,6 +68,7 @@ class DoclingRecord(Record):
         # get image info
         if hasattr(docling_object, "image"):
             data["image"] = docling_object.image.pil_image
+            docling_object.image.uri = None
         else:
             data["image"] = docling_object.get_image(document)
         if data["image"]:
@@ -93,6 +94,7 @@ class DoclingRecord(Record):
         ):
             data["text"] = docling_object.export_to_document_tokens(document)
         data["text_length"] = len(data["text"])
+
         data["raw_response"] = docling_object.model_dump(mode="json")
         return cls(**data, tags=tags, properties=properties, error=error)
 
