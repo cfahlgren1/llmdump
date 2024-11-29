@@ -17,8 +17,6 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 
 
-
-
 def flatten_dict(d, prefix=""):
     """Flatten a python dictionary, turning nested keys into dotted keys"""
     flat = {}
@@ -113,7 +111,7 @@ class OpenTelemetryStore(Store):
     @classmethod
     def connect(cls, tracer=None, root_span=None, namespace=None, exporter=None):
         """Create an ObservabilityStore, optionally starting from a prior tracer or trace,
-           assigning a custom namespace, or setting an alternate exporter"""
+        assigning a custom namespace, or setting an alternate exporter"""
         return cls(tracer, root_span, namespace, exporter)
 
     def _init_table(self, record: "Record"):
