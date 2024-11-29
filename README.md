@@ -53,7 +53,7 @@ response = client.chat.completions.create(
 
 ### Change OpenAI compliant LLM provider
 
-The `wrap_openai` function allows you to wrap any OpenAI compliant LLM provider. Take a look at [the example doing this for Ollama](./examples/ollama_example.py) for more details.
+The `wrap_openai` function allows you to wrap any OpenAI compliant LLM provider. Take a look at [the example doing this for Ollama](./examples/observers/ollama_example.py) for more details.
 
 ## Stores
 
@@ -61,9 +61,9 @@ The `wrap_openai` function allows you to wrap any OpenAI compliant LLM provider.
 
 | Store | Example | Annotate | Local | Free | UI filters | SQL filters |
 |-------|---------|----------|-------|------|-------------|--------------|
-| [Hugging Face Datasets](https://huggingface.co/docs/huggingface_hub/en/package_reference/io-management#datasets) | [example](./examples/datasets_example.py) | ❌ | ❌ | ✅ | ✅ | ✅ |
-| [DuckDB](https://duckdb.org/) | [example](./examples/duckdb_example.py.py) | ❌ | ✅ | ✅ | ❌ | ✅ |
-| [Argilla](https://argilla.io/) | [example](./examples/argilla_example.py) | ✅ | ❌ | ✅ | ✅ | ❌ |
+| [Hugging Face Datasets](https://huggingface.co/docs/huggingface_hub/en/package_reference/io-management#datasets) | [example](./examples/stores/datasets_example.py) | ❌ | ❌ | ✅ | ✅ | ✅ |
+| [DuckDB](https://duckdb.org/) | [example](./examples/stores/duckdb_example.py.py) | ❌ | ✅ | ✅ | ❌ | ✅ |
+| [Argilla](https://argilla.io/) | [example](./examples/stores/argilla_example.py) | ✅ | ❌ | ✅ | ✅ | ❌ |
 
 ### Viewing / Querying
 
