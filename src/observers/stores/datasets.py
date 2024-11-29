@@ -6,14 +6,45 @@ import tempfile
 import uuid
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
+from datasets import Dataset
 from huggingface_hub import CommitScheduler, login, metadata_update, whoami
+from PIL import Image
 
 from observers.stores.base import Store
 
 if TYPE_CHECKING:
     from observers.observers.base import Record
+
+
+def push_to_hub(self, *args, **kwargs):
+    """Push pending changes to the Hugging Face Hub"""
+
+    data = []
+    for json_file in Path(self.folder_path).rglob("*.json"):
+        with open(json_file) as f:
+            for line in f:
+                data.append(json.loads(line))
+
+    dataset = Dataset.from_list(data)
+    if "file_name" in dataset.column_names:
+
+        def add_image_from_file_name(batch: List[Dict]):
+            batch["image"] = [
+                Image.open(Path(self.folder_path) / file_name)
+                for file_name in batch["file_name"]
+            ]
+            return batch
+
+        dataset = dataset.map(add_image_from_file_name, batched=True)
+        dataset = dataset.remove_columns(["file_name"])
+        dataset = dataset.rename_column("image", "file_name")
+
+    dataset.push_to_hub(repo_id=self.repo_id, token=self.token, private=self.private)
+
+
+CommitScheduler.push_to_hub = push_to_hub
 
 
 @dataclass
@@ -80,6 +111,7 @@ class DatasetsStore(Store):
             ignore_patterns=self.ignore_patterns,
             squash_history=self.squash_history,
         )
+        self._scheduler.private = self.private
         metadata_update(
             repo_id=repo_id,
             metadata={"tags": ["observers", record.table_name.split("_")[0]]},
@@ -133,17 +165,8 @@ class DatasetsStore(Store):
 
                 for image_field in record.image_fields:
                     if record_dict[image_field]:
-                        # Get current image count and calculate folder number
-                        image_count = len(
-                            list(self._scheduler.folder_path.glob("images_*/*.png"))
-                        )
-                        folder_num = (
-                            image_count // 10000
-                        )  # 10k is the maximum per directory on GH
-                        folder_name = f"images_{folder_num}"
-
-                        # Create folder if it doesn't exist
-                        image_folder = self._scheduler.folder_path / folder_name
+                        # Create images folder if it doesn't exist
+                        image_folder = self._scheduler.folder_path / "images"
                         image_folder.mkdir(exist_ok=True)
 
                         # Save image with unique filename based on content
@@ -168,7 +191,7 @@ class DatasetsStore(Store):
                 if "uri" in record_dict:
                     record_dict.pop("uri")
 
-                # Replace empty dictionaries with None
+                # Replace empty dictionaries with None to avoid parqut errors
                 for key, value in record_dict.items():
                     if value == {}:
                         record_dict[key] = None
@@ -181,18 +204,3 @@ class DatasetsStore(Store):
                 except Exception as e:
                     print(f"Failed to write record: {str(e)}")
                     raise
-
-            # Create/update metadata.jsonl by combining all .json files
-            # https://huggingface.co/docs/datasets/en/image_dataset#imagefolder
-            metadata_path = self._scheduler.folder_path / "metadata.jsonl"
-
-            # Find all .json files in the directory
-            json_files = list(self._scheduler.folder_path.glob("*.json"))
-
-            # Combine contents of all .json files into metadata.jsonl
-            with metadata_path.open("w") as metadata_file:
-                for json_file in json_files:
-                    with json_file.open() as f:
-                        for line in f:
-                            metadata_file.write(line)
-                metadata_file.flush()
