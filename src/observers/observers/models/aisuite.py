@@ -6,12 +6,13 @@ from observers.stores.duckdb import DuckDBStore
 if TYPE_CHECKING:
     from aisuite import Client
 
+    from observers.stores.argilla import ArgillaStore
     from observers.stores.datasets import DatasetsStore
 
 
 def wrap_aisuite(
     client: "Client",
-    store: Optional[Union["DatasetsStore", DuckDBStore]] = None,
+    store: Optional[Union["DatasetsStore", DuckDBStore, "ArgillaStore"]] = None,
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
 ) -> "Client":
