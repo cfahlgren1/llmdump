@@ -6,10 +6,7 @@ import os
 import tempfile
 import uuid
 from dataclasses import asdict, dataclass, field
-<<<<<<< HEAD
 from io import BytesIO
-=======
->>>>>>> 83ad78b (add docling example)
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional
 
@@ -20,7 +17,6 @@ from PIL import Image
 from observers.stores.base import Store
 
 if TYPE_CHECKING:
-<<<<<<< HEAD
     from observers.observers.base import Record
 
 
@@ -48,9 +44,6 @@ def push_to_hub(self):
 
 
 CommitScheduler.push_to_hub = push_to_hub
-=======
-    from observers.observers.models.base import Record
->>>>>>> 83ad78b (add docling example)
 
 
 @dataclass
@@ -170,7 +163,6 @@ class DatasetsStore(Store):
                     if record_dict[json_field]:
                         record_dict[json_field] = json.dumps(record_dict[json_field])
 
-<<<<<<< HEAD
                 # Handle image fields
                 for image_field in record.image_fields:
                     if record_dict[image_field]:
@@ -209,32 +201,3 @@ class DatasetsStore(Store):
                     f.flush()
                 except Exception:
                     raise
-=======
-                for image_field in record.image_fields:
-                    if record_dict[image_field]:
-                        # Get current image count and calculate folder number
-                        image_count = len(
-                            list(self._scheduler.folder_path.glob("images_*/*.png"))
-                        )
-                        folder_num = image_count // 10000
-                        folder_name = f"images_{folder_num}"
-
-                        # Create folder if it doesn't exist
-                        image_folder = self._scheduler.folder_path / folder_name
-                        image_folder.mkdir(exist_ok=True)
-
-                        # Save image with unique filename in appropriate folder
-                        image_file_name = f"{uuid.uuid4()}.png"
-                        image_path = image_folder / image_file_name
-                        record_dict[image_field].save(image_path)
-
-                        # Store relative path in record
-                        record_dict[image_field] = str(
-                            Path(image_folder.name) / image_file_name
-                        )
-
-                if "uri" in record_dict:
-                    record_dict.pop("uri")
-
-                f.write(json.dumps(record_dict))
->>>>>>> 83ad78b (add docling example)

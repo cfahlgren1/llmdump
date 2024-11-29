@@ -11,7 +11,7 @@ from observers.stores.base import Store
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider, Tracer, Span
 from opentelemetry.sdk.trace.export import (
-    BatchSpanProcessor,
+    BatchSpanProcessor, SpanExporter
 )
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
@@ -50,6 +50,7 @@ class OpenTelemetryStore(Store):
     # but, set here as well.
     tracer: Optional[Tracer] = None
     root_span: Optional[Span] = None
+    exporter: Optional[SpanExporter] = None
     namespace: str = "observers.dev/observers"
 
     def __post_init__(self):

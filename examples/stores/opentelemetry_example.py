@@ -1,5 +1,5 @@
 from observers.observers import wrap_openai
-from observers.stores import OpenTelemetryStore
+from observers.stores.opentelemetry import OpenTelemetryStore
 from openai import OpenAI
 
 
@@ -12,20 +12,19 @@ from openai import OpenAI
 
 store = OpenTelemetryStore()
 
-openai_client = OpenAI()
+openai_client = OpenAI(
+        base_url="http://localhost:11434/v1",
+        api_key="unused"
+        )
 
 client = wrap_openai(openai_client, store=store)
 
 response = client.chat.completions.create(
-    model="gpt-4o",
-    messages=[{"role": "user", "content": "Tell me a joke."}],
+    model="llama3.1", messages=[{"role": "user", "content": "Tell me a joke."}]
 )
+
 # The OpenTelemetryStore links multiple completions into a trace
-response2 = client.chat.completions.create(
-    model="gpt-4o",
-    messages=[{"role": "user", "content": "Tell me another joke."}],
+response = client.chat.completions.create(
+    model="llama3.1", messages=[{"role": "user", "content": "Tell me another joke."}]
 )
-
 # Now query your Opentelemetry Compatible observability store as you usually do!
-
-print(response.choices[0].message.content)
