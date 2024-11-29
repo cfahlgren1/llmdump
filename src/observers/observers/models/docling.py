@@ -1,7 +1,7 @@
 import base64
 from dataclasses import dataclass
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
 from PIL import Image
 
@@ -270,47 +270,56 @@ def wrap_docling(
         raise ValueError(f"Invalid media type: {media_types}")
 
     original_convert = client.convert
+    original_convert_all = client.convert_all
+
+    def process_document(document, page_no, page) -> None:
+        for docling_object, _level in document.iterate_items(page_no=page_no):
+            if (
+                isinstance(docling_object, (SectionHeaderItem, ListItem, TextItem))
+                and "texts" in media_types
+            ):
+                record = DoclingRecord.create(
+                    docling_object=docling_object,
+                    document=document,
+                    page=page,
+                    tags=tags,
+                    properties=properties,
+                )
+                store.add(record)
+            if isinstance(docling_object, PictureItem) and "pictures" in media_types:
+                record = DoclingRecord.create(
+                    docling_object=docling_object,
+                    document=document,
+                    page=page,
+                    tags=tags,
+                    properties=properties,
+                )
+                store.add(record)
+            if isinstance(docling_object, TableItem) and "tables" in media_types:
+                record = DoclingRecord.create(
+                    docling_object=docling_object,
+                    document=document,
+                    page=page,
+                    tags=tags,
+                    properties=properties,
+                )
+                store.add(record)
 
     def convert(*args, **kwargs) -> "DoclingDocument":
         result = original_convert(*args, **kwargs)
         document = result.document
         for page_no, page in enumerate(document.pages):
-            for docling_object, _level in document.iterate_items(page_no=page_no):
-                if (
-                    isinstance(docling_object, (SectionHeaderItem, ListItem, TextItem))
-                    and "texts" in media_types
-                ):
-                    record = DoclingRecord.create(
-                        docling_object=docling_object,
-                        document=document,
-                        page=page,
-                        tags=tags,
-                        properties=properties,
-                    )
-                    store.add(record)
-                if (
-                    isinstance(docling_object, PictureItem)
-                    and "pictures" in media_types
-                ):
-                    record = DoclingRecord.create(
-                        docling_object=docling_object,
-                        document=document,
-                        page=page,
-                        tags=tags,
-                        properties=properties,
-                    )
-                    store.add(record)
-                if isinstance(docling_object, TableItem) and "tables" in media_types:
-                    record = DoclingRecord.create(
-                        docling_object=docling_object,
-                        document=document,
-                        page=page,
-                        tags=tags,
-                        properties=properties,
-                    )
-                    store.add(record)
+            process_document(document, page_no, page)
+        return result
 
-        return record
+    def convert_all(*args, **kwargs) -> Iterator["DoclingDocument"]:
+        results = original_convert_all(*args, **kwargs)
+        for result in results:
+            document = result.document
+            for page_no, page in enumerate(document.pages):
+                process_document(document, page_no, page)
+            yield result
 
     client.convert = convert
+    client.convert_all = convert_all
     return client
