@@ -1,12 +1,14 @@
 import atexit
+import base64
 import hashlib
 import json
 import os
 import tempfile
 import uuid
 from dataclasses import asdict, dataclass, field
+from io import BytesIO
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from datasets import Dataset
 from huggingface_hub import CommitScheduler, login, metadata_update, whoami
@@ -22,24 +24,19 @@ def push_to_hub(self):
     """Push pending changes to the Hugging Face Hub"""
     with self.lock:
         data = []
-        for json_file in Path(self.folder_path).rglob("*.json"):
-            with open(json_file) as f:
-                for line in f:
-                    data.append(json.loads(line))
+        records = [
+            json.loads(line)
+            for json_file in Path(self.folder_path).rglob("*.json")
+            for line in open(json_file)
+        ]
+
+        for record in records:
+            if record.get("image") and record["image"].get("path"):
+                image_path = Path(self.folder_path) / record["image"]["path"]
+                record["image"] = Image.open(image_path)
+            data.append(record)
 
         dataset = Dataset.from_list(data)
-        if "file_name" in dataset.column_names:
-
-            def add_image_from_file_name(batch: List[Dict]):
-                batch["image"] = [
-                    Image.open(Path(self.folder_path) / file_name)
-                    for file_name in batch["file_name"]
-                ]
-                return batch
-
-            dataset = dataset.map(add_image_from_file_name, batched=True)
-            dataset = dataset.remove_columns(["file_name"])
-            dataset = dataset.rename_column("image", "file_name")
 
         dataset.push_to_hub(
             repo_id=self.repo_id, token=self.token, private=self.private
@@ -161,48 +158,46 @@ class DatasetsStore(Store):
                 record_dict = asdict(record)
                 record_dict["synced_at"] = None
 
+                # Handle JSON fields
                 for json_field in record.json_fields:
                     if record_dict[json_field]:
                         record_dict[json_field] = json.dumps(record_dict[json_field])
 
+                # Handle image fields
                 for image_field in record.image_fields:
                     if record_dict[image_field]:
-                        # Create images folder if it doesn't exist
                         image_folder = self._scheduler.folder_path / "images"
                         image_folder.mkdir(exist_ok=True)
 
-                        # Save image with unique filename based on content
+                        # Generate unique filename based on record content
                         filtered_dict = {
                             k: v
                             for k, v in sorted(record_dict.items())
                             if k not in ["uri", image_field, "id"]
                         }
-                        image_file_name = f"{hashlib.sha256(json.dumps(obj=filtered_dict, sort_keys=True).encode()).hexdigest()}.png"
-                        image_path = image_folder / image_file_name
-                        record_dict[image_field].save(image_path)
+                        content_hash = hashlib.sha256(
+                            json.dumps(obj=filtered_dict, sort_keys=True).encode()
+                        ).hexdigest()
+                        image_path = image_folder / f"{content_hash}.png"
 
-                        # Store relative path in record
-                        record_dict[image_field] = str(
-                            Path(image_folder.name) / image_file_name
+                        # Save image and update record
+                        image_bytes = base64.b64decode(
+                            record_dict[image_field]["bytes"]
+                        )
+                        Image.open(BytesIO(image_bytes)).save(image_path)
+                        record_dict[image_field].update(
+                            {"path": str(image_path), "bytes": None}
                         )
 
-                        record_dict["file_name"] = record_dict[image_field]
-
-                if image_field in record_dict:
-                    record_dict.pop(image_field)
-                if "uri" in record_dict:
-                    record_dict.pop("uri")
-
-                # Replace empty dictionaries with None to avoid parqut errors
-                for key, value in record_dict.items():
-                    if value == {}:
-                        record_dict[key] = None
-
+                # Clean up empty dictionaries
+                record_dict = {
+                    k: None if v == {} else v for k, v in record_dict.items()
+                }
+                sorted_dict = {
+                    col: record_dict.get(col) for col in record.table_columns
+                }
                 try:
-                    f.write(
-                        json.dumps(record_dict) + "\n"
-                    )  # Add newline between records
-                    f.flush()  # Ensure data is written to disk
-                except Exception as e:
-                    print(f"Failed to write record: {str(e)}")
+                    f.write(json.dumps(sorted_dict) + "\n")
+                    f.flush()
+                except Exception:
                     raise

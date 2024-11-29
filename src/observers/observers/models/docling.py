@@ -4,8 +4,6 @@ from dataclasses import dataclass
 from io import BytesIO
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
-from PIL import Image
-
 from observers.observers.base import Record
 from observers.stores.duckdb import DuckDBStore
 
@@ -37,7 +35,7 @@ class DoclingRecord(Record):
     label: str = None
     filename: str = None
     page_no: int = 0
-    image: Optional[Image.Image] = None
+    image: Optional[Dict[str, Any]] = None
     mimetype: Optional[str] = None
     dpi: Optional[int] = None
     width: Optional[int] = None
@@ -68,22 +66,22 @@ class DoclingRecord(Record):
         data["label"] = docling_object.label.value
         # get image info
         if hasattr(docling_object, "image"):
-            data["image"] = docling_object.image.pil_image
+            image = docling_object.image.pil_image
             docling_object.image.uri = None
         else:
-            data["image"] = docling_object.get_image(document)
-        if data["image"]:
+            image = docling_object.get_image(document)
+        if image:
             data["mimetype"] = "image/png"  # PIL images are saved as PNG
-            data["dpi"] = data["image"].info.get(
+            data["dpi"] = image.info.get(
                 "dpi", 72
             )  # Default to 72 DPI if not specified
-            data["width"] = data["image"].width
-            data["height"] = data["image"].height
+            data["width"] = image.width
+            data["height"] = image.height
             # Create data URI for the image
             buffered = BytesIO()
-            data["image"].save(buffered, format="PNG")
+            image.save(buffered, format="PNG")
             img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-            data["uri"] = f"data:image/png;base64,{img_str}"
+            data["image"] = {"bytes": img_str, "path": None}
 
         # get caption or text
         if hasattr(docling_object, "caption_text") and callable(
@@ -115,19 +113,18 @@ class DoclingRecord(Record):
     def table_columns(self):
         return [
             "id",
-            "version",
-            "mime_type",
-            "page_no",
-            "image",
             "filename",
             "label",
-            "mimetype",
-            "dpi",
-            "width",
-            "height",
-            "uri",
             "text",
             "text_length",
+            "image",
+            "width",
+            "height",
+            "dpi",
+            "mimetype",
+            "page_no",
+            "mime_type",
+            "version",
             "tags",
             "properties",
             "error",
@@ -140,19 +137,18 @@ class DoclingRecord(Record):
         return f"""
         CREATE TABLE IF NOT EXISTS {self.table_name} (
             id VARCHAR PRIMARY KEY,
-            version VARCHAR,
-            mime_type VARCHAR,
-            page_no INTEGER,
-            image BLOB,
             filename VARCHAR,
             label VARCHAR,
-            mimetype VARCHAR,
-            dpi INTEGER,
-            width INTEGER,
-            height INTEGER,
-            uri VARCHAR,
             text VARCHAR,
             text_length INTEGER,
+            image STRUCT(bytes BLOB, path VARCHAR),
+            width INTEGER,
+            height INTEGER,
+            dpi INTEGER,
+            mimetype VARCHAR,
+            page_no INTEGER,
+            mime_type VARCHAR,
+            version VARCHAR,
             tags VARCHAR[],
             properties JSON,
             error VARCHAR,

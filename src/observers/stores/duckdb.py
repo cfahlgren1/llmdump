@@ -58,11 +58,9 @@ class DuckDBStore(Store):
             if record_dict[json_field]:
                 record_dict[json_field] = json.dumps(record_dict[json_field])
 
-        for image_field in record.image_fields:
-            if record_dict[image_field]:
-                record_dict[image_field] = record_dict[image_field].tobytes()
-
-        placeholders = ", ".join(["$" + str(i + 1) for i in range(len(record_dict))])
+        placeholders = ", ".join(
+            ["$" + str(i + 1) for i in range(len(record.table_columns))]
+        )
 
         # Sort record_dict based on table_columns order
         if hasattr(record, "table_columns"):
@@ -71,7 +69,10 @@ class DuckDBStore(Store):
 
         self._conn.execute(
             f"INSERT INTO {record.table_name} VALUES ({placeholders})",
-            [record_dict[k] for k in record_dict.keys()],
+            [
+                record_dict[k] if k in record_dict else None
+                for k in record.table_columns
+            ],
         )
 
     def get_unsynced(self, table_name: str) -> List[tuple]:
