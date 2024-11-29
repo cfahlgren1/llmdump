@@ -58,7 +58,17 @@ class DuckDBStore(Store):
             if record_dict[json_field]:
                 record_dict[json_field] = json.dumps(record_dict[json_field])
 
+        for image_field in record.image_fields:
+            if record_dict[image_field]:
+                record_dict[image_field] = record_dict[image_field].tobytes()
+
         placeholders = ", ".join(["$" + str(i + 1) for i in range(len(record_dict))])
+
+        # Sort record_dict based on table_columns order
+        if hasattr(record, "table_columns"):
+            sorted_dict = {k: record_dict[k] for k in record.table_columns}
+            record_dict = sorted_dict
+
         self._conn.execute(
             f"INSERT INTO {record.table_name} VALUES ({placeholders})",
             [record_dict[k] for k in record_dict.keys()],
