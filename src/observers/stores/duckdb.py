@@ -39,11 +39,12 @@ class DuckDBStore(Store):
             path = os.path.join(os.getcwd(), DEFAULT_DB_NAME)
         return cls(path=path)
 
-    def _init_table(self, record: "Record"):
+    def _init_table(self, record: "Record") -> str:
         table_name = f"{record.table_name}_{str(uuid.uuid4())[:8]}"
         duckdb_schema = record.duckdb_schema.replace(record.table_name, table_name)
         self._conn.execute(duckdb_schema)
         self._tables.append(table_name)
+        return table_name
 
     def _get_tables(self) -> List[str]:
         """Get all tables in the database"""
