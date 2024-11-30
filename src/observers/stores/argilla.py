@@ -1,8 +1,17 @@
+import uuid
 from dataclasses import asdict, dataclass, field
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List, Optional, Union
 
 import argilla as rg
-from argilla import Argilla
+from argilla import (
+    Argilla,
+    LabelQuestion,
+    MultiLabelQuestion,
+    RankingQuestion,
+    RatingQuestion,
+    SpanQuestion,
+    TextQuestion,
+)
 
 from observers.stores.base import Store
 
@@ -20,6 +29,18 @@ class ArgillaStore(Store):
     api_key: Optional[str] = field(default=None)
     dataset_name: Optional[str] = field(default=None)
     workspace_name: Optional[str] = field(default=None)
+    questions: Optional[
+        List[
+            Union[
+                TextQuestion,
+                LabelQuestion,
+                SpanQuestion,
+                RatingQuestion,
+                RankingQuestion,
+                MultiLabelQuestion,
+            ]
+        ]
+    ] = field(default=None)
 
     _dataset: Optional[rg.Dataset] = None
     _dataset_keys: Optional[List[str]] = None
@@ -30,19 +51,28 @@ class ArgillaStore(Store):
         self._client = Argilla(api_url=self.api_url, api_key=self.api_key)
 
     def _init_table(self, record: "Record") -> None:
-        dataset_name = self.dataset_name or record.table_name
+        dataset_name = (
+            self.dataset_name or f"{record.table_name}_{str(uuid.uuid4())[:8]}"
+        )
         workspace_name = self.workspace_name or self._client.me.username
         workspace = self._client.workspaces(name=workspace_name)
         if not workspace:
             workspace = self._client.workspaces.add(rg.Workspace(name=workspace_name))
         dataset = self._client.datasets(name=dataset_name, workspace=workspace_name)
+
         if not dataset:
+            settings = record.argilla_settings(self._client)
+            if self.questions:
+                settings.questions = self.questions
             dataset = rg.Dataset(
                 name=dataset_name,
                 workspace=workspace_name,
-                settings=record.argilla_settings(self._client),
+                settings=settings,
                 client=self._client,
             ).create()
+        else:
+            if self.questions:
+                raise ValueError("Questions are not supported for existing datasets")
         self._dataset = dataset
         dataset_keys = (
             [field.name for field in dataset.settings.fields]
