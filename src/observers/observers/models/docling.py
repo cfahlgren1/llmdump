@@ -1,4 +1,5 @@
 import base64
+import inspect
 import warnings
 from dataclasses import dataclass
 from io import BytesIO
@@ -88,10 +89,27 @@ class DoclingRecord(Record):
             docling_object.caption_text
         ):
             data["text"] = docling_object.caption_text(document)
-        if getattr(docling_object, "export_to_document_tokens") and callable(
+        elif getattr(docling_object, "export_to_html") and callable(
+            docling_object.export_to_html
+        ):
+            data["text"] = docling_object.export_to_html(document, add_caption=True)
+        elif getattr(docling_object, "export_to_document_tokens") and callable(
             docling_object.export_to_document_tokens
         ):
-            data["text"] = docling_object.export_to_document_tokens(document)
+            export_to_document_tokens_params = inspect.signature(
+                docling_object.export_to_document_tokens
+            ).parameters
+            boolean_args = {
+                name: False
+                for name, param in export_to_document_tokens_params.items()
+                if param.annotation == bool
+            }
+            if "add_content" in boolean_args:
+                boolean_args["add_content"] = True
+
+            data["text"] = docling_object.export_to_document_tokens(
+                document, **boolean_args
+            )
         data["text_length"] = len(data["text"])
 
         data["raw_response"] = docling_object.model_dump(mode="json")
