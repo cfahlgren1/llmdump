@@ -40,7 +40,7 @@ class DuckDBStore(Store):
         return cls(path=path)
 
     def _init_table(self, record: "Record") -> str:
-        table_name = f"{record.table_name}_{str(uuid.uuid4())[:8]}"
+        table_name = f"{record.table_name}_{uuid.uuid4().hex[:8]}"
         duckdb_schema = record.duckdb_schema.replace(record.table_name, table_name)
         self._conn.execute(duckdb_schema)
         self._tables.append(table_name)

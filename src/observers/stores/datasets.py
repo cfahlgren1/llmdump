@@ -93,8 +93,8 @@ class DatasetsStore(Store):
             shutil.rmtree(self._temp_dir)
 
     def _init_table(self, record: "Record"):
-        repo_name = self.repo_name or f"{record.table_name}_{str(uuid.uuid4())[:8]}"
-        org_name = self.org_name or whoami(token=self.token)["name"]
+        repo_name = self.repo_name or f"{record.table_name}_{uuid.uuid4().hex[:8]}"
+        org_name = self.org_name or whoami(token=self.token).get("name")
         repo_id = f"{org_name}/{repo_name}"
         self._filename = f"{record.table_name}_{uuid.uuid4()}.json"
         self._scheduler = CommitScheduler(

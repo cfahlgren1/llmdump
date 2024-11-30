@@ -52,7 +52,7 @@ class ArgillaStore(Store):
 
     def _init_table(self, record: "Record") -> None:
         dataset_name = (
-            self.dataset_name or f"{record.table_name}_{str(uuid.uuid4())[:8]}"
+            self.dataset_name or f"{record.table_name}_{uuid.uuid4().hex[:8]}"
         )
         workspace_name = self.workspace_name or self._client.me.username
         workspace = self._client.workspaces(name=workspace_name)
@@ -70,9 +70,10 @@ class ArgillaStore(Store):
                 settings=settings,
                 client=self._client,
             ).create()
-        else:
-            if self.questions:
-                raise ValueError("Questions are not supported for existing datasets")
+        elif self.questions:
+            raise ValueError(
+                "Custom questions are not supported for existing datasets."
+            )
         self._dataset = dataset
         dataset_keys = (
             [field.name for field in dataset.settings.fields]
