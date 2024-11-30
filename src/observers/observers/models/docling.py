@@ -89,11 +89,11 @@ class DoclingRecord(Record):
             docling_object.caption_text
         ):
             data["text"] = docling_object.caption_text(document)
-        elif getattr(docling_object, "export_to_html") and callable(
+        elif hasattr(docling_object, "export_to_html") and callable(
             docling_object.export_to_html
         ):
             data["text"] = docling_object.export_to_html(document, add_caption=True)
-        elif getattr(docling_object, "export_to_document_tokens") and callable(
+        elif hasattr(docling_object, "export_to_document_tokens") and callable(
             docling_object.export_to_document_tokens
         ):
             export_to_document_tokens_params = inspect.signature(
