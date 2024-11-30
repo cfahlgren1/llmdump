@@ -52,15 +52,10 @@ class DuckDBStore(Store):
 
     def add(self, record: "Record"):
         """Add a new record to the database"""
-        table_exists = False
-        table_name = None
-        if self._tables:
-            for table in self._tables:
-                if record.table_name in table:
-                    table_exists = True
-                    table_name = table
-                    break
-        if not table_exists:
+        table_name = next(
+            (table for table in self._tables if record.table_name in table), None
+        )
+        if not table_name:
             table_name = self._init_table(record)
 
         record_dict = asdict(record)
