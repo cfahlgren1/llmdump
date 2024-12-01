@@ -5,10 +5,12 @@ from openai import OpenAI
 
 # Use your usual environment variables to configure OpenTelemetry
 # Here's an example for Honeycomb
-# export OTEL_SERVICE_NAME=<identifiable-service-name>
-# export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
-# export OTEL_EXPORTER_OTLP_ENDPOINT="https://api.honeycomb.io"
-# export OTEL_EXPORTER_OTLP_HEADERS="x-honeycomb-team=<ingest-key>"
+os.environ.setdefault('OTEL_SERVICE_NAME', 'llm-observer-example')
+os.environ.setdefault('OTEL_EXPORTER_OTLP_PROTOCOL', 'http/protobuf')
+os.environ.setdefault('OTEL_EXPORTER_OTLP_ENDPOINT', 'https://api.honeycomb.io')
+
+# Note: Keeping the sensitive ingest key in actual env vars, not in code
+# export OTEL_EXPORTER_OTLP_HEADERS="x-honeycomb-team=<api-key>"
 
 store = OpenTelemetryStore()
 
