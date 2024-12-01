@@ -14,16 +14,16 @@ os.environ.setdefault('OTEL_EXPORTER_OTLP_ENDPOINT', 'https://api.honeycomb.io')
 
 store = OpenTelemetryStore()
 
-openai_client = OpenAI(base_url="http://localhost:11434/v1", api_key="unused")
+openai_client = OpenAI()
 
 client = wrap_openai(openai_client, store=store)
 
 response = client.chat.completions.create(
-    model="llama3.1", messages=[{"role": "user", "content": "Tell me a joke."}]
+    model="gpt-4o", messages=[{"role": "user", "content": "Tell me a joke."}]
 )
 
 # The OpenTelemetryStore links multiple completions into a trace
 response = client.chat.completions.create(
-    model="llama3.1", messages=[{"role": "user", "content": "Tell me another joke."}]
+    model="gpt-4o", messages=[{"role": "user", "content": "Tell me another joke."}]
 )
 # Now query your Opentelemetry Compatible observability store as you usually do!
