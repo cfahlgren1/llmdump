@@ -57,7 +57,7 @@ response = client.chat.completions.create(
 - [OpenAI](https://openai.com/) and every other LLM provider that implements the [OpenAI API message formate](https://platform.openai.com/docs/api-reference)
 - [AISuite](https://github.com/andrewyng/aisuite), which is an LLM router by Andrew Ng and which maps to [a lot of LLM API providers](https://github.com/andrewyng/aisuite/tree/main/aisuite/providers) with a uniform interface.
 - [Litellm](https://docs.litellm.ai/docs/), which is a library that allows you to use a lot of different LLM APIs with a uniform interface.
-- [Docling](https://github.com/docling/docling), which is a document intelligence platform that can be used to wrap generative AI APIs that interact with documents.
+- [Docling](https://github.com/docling/docling), Docling parses documents and exports them to the desired format with ease and speed. This observer allows you to wrap this and push popular document formats (PDF, DOCX, PPTX, XLSX, Images, HTML, AsciiDoc & Markdown) to the different stores.
 
 ### Change OpenAI compliant LLM provider
 
