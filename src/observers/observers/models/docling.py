@@ -71,20 +71,20 @@ class DoclingRecord(Record):
                 docling_object.image.uri = None
             else:
                 image = docling_object.get_image(document)
+            if image:
+                data["mimetype"] = "image/png"  # PIL images are saved as PNG
+                data["dpi"] = image.info.get(
+                    "dpi", 72
+                )  # Default to 72 DPI if not specified
+                data["width"] = image.width
+                data["height"] = image.height
+                # Create data URI for the image
+                buffered = BytesIO()
+                image.save(buffered, format="PNG")
+                img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+                data["image"] = {"bytes": img_str, "path": None}
         except Exception as e:
             error = str(e)
-        if image:
-            data["mimetype"] = "image/png"  # PIL images are saved as PNG
-            data["dpi"] = image.info.get(
-                "dpi", 72
-            )  # Default to 72 DPI if not specified
-            data["width"] = image.width
-            data["height"] = image.height
-            # Create data URI for the image
-            buffered = BytesIO()
-            image.save(buffered, format="PNG")
-            img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-            data["image"] = {"bytes": img_str, "path": None}
 
         # get caption from image or table
         caption_text = None
@@ -193,6 +193,13 @@ class DoclingRecord(Record):
                 ),
                 rg.TextField(
                     name="text",
+                    description="The text.",
+                    markdown=True,
+                    required=False,
+                    client=client,
+                ),
+                rg.TextField(
+                    name="caption_text",
                     description="The caption text.",
                     markdown=True,
                     required=False,
@@ -203,19 +210,19 @@ class DoclingRecord(Record):
                 rg.TextQuestion(
                     name="question_or_query",
                     title="Question or Query",
-                    description="The question or query associated with the picture.",
+                    description="The question or query associated with the information.",
                     required=True,
                 ),
                 rg.TextQuestion(
                     name="answer",
                     title="Answer",
-                    description="The answer to the question or query associated with the picture.",
+                    description="The answer to the question or query associated with the information.",
                     required=False,
                 ),
                 rg.RatingQuestion(
                     name="rating_image",
                     title="Rating image",
-                    description="How would you rate the picture? 1 being the least relevant and 5 being the most relevant.",
+                    description="How would you rate the image? 1 being the least relevant and 5 being the most relevant.",
                     values=[1, 2, 3, 4, 5],
                     required=False,
                 ),
@@ -230,6 +237,12 @@ class DoclingRecord(Record):
                     name="text_improve",
                     title="Improve text",
                     description="If you would like to improve the text, please provide a better text here.",
+                    required=False,
+                ),
+                rg.TextQuestion(
+                    name="caption_text_improve",
+                    title="Improve caption text",
+                    description="If you would like to improve the caption text, please provide a better caption text here.",
                     required=False,
                 ),
             ],
