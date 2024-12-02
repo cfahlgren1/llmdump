@@ -28,6 +28,12 @@ Whenever you want to observer document information, you can use our Docling inte
 pip install observers[docling]
 ```
 
+For open telemetry, you can install the following:
+
+```bash
+pip install observers[opentelemetry]
+```
+
 ## Usage
 
 We differentiate between observers and stores. Observers wrap generative AI APIs (like OpenAI or llama-index) and track their interactions. Stores are classes that sync these observations to different storage backends (like DuckDB or Hugging Face datasets).
@@ -56,7 +62,7 @@ response = client.chat.completions.create(
 
 - [OpenAI](https://openai.com/) and every other LLM provider that implements the [OpenAI API message formate](https://platform.openai.com/docs/api-reference)
 - [AISuite](https://github.com/andrewyng/aisuite), which is an LLM router by Andrew Ng and which maps to [a lot of LLM API providers](https://github.com/andrewyng/aisuite/tree/main/aisuite/providers) with a uniform interface.
-- [Litellm](https://docs.litellm.ai/docs/), which is a library that allows you to use a lot of different LLM APIs with a uniform interface.
+- [Litellm](https://docs.litellm.ai/docs/), which is a library that allows you to use [a lot of different LLM APIs](https://docs.litellm.ai/docs/providers) with a uniform interface.
 - [Docling](https://github.com/docling/docling), Docling parses documents and exports them to the desired format with ease and speed. This observer allows you to wrap this and push popular document formats (PDF, DOCX, PPTX, XLSX, Images, HTML, AsciiDoc & Markdown) to the different stores.
 
 ### Change OpenAI compliant LLM provider
@@ -110,6 +116,7 @@ The Argilla Store allows you to sync your observations to [Argilla](https://argi
 ![Argilla Store](./assets/argilla.png)
 
 #### OpenTelemetry Store
+
 The OpenTelemetry "Store" allows you to sync your observations to any provider that supports OpenTelemetry! Examples are provided for [Honeycomb](https://honeycomb.io), but any provider that supplies OpenTelemetry compatible environment variables should Just Work®, and your queries will be executed as usual in your provider, against _trace_ data coming from Observers.
 
 ## Contributing
