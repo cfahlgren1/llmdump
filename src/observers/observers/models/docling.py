@@ -71,20 +71,20 @@ class DoclingRecord(Record):
                 docling_object.image.uri = None
             else:
                 image = docling_object.get_image(document)
+            if image:
+                data["mimetype"] = "image/png"  # PIL images are saved as PNG
+                data["dpi"] = image.info.get(
+                    "dpi", 72
+                )  # Default to 72 DPI if not specified
+                data["width"] = image.width
+                data["height"] = image.height
+                # Create data URI for the image
+                buffered = BytesIO()
+                image.save(buffered, format="PNG")
+                img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+                data["image"] = {"bytes": img_str, "path": None}
         except Exception as e:
             error = str(e)
-        if image:
-            data["mimetype"] = "image/png"  # PIL images are saved as PNG
-            data["dpi"] = image.info.get(
-                "dpi", 72
-            )  # Default to 72 DPI if not specified
-            data["width"] = image.width
-            data["height"] = image.height
-            # Create data URI for the image
-            buffered = BytesIO()
-            image.save(buffered, format="PNG")
-            img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-            data["image"] = {"bytes": img_str, "path": None}
 
         # get caption from image or table
         caption_text = None
