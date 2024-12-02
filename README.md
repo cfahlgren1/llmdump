@@ -22,6 +22,18 @@ Or if you want to use other LLM providers through AISuite or Litellm, you can in
 pip install observers[aisuite] # or observers[litellm]
 ```
 
+Whenever you want to observer document information, you can use our Docling integration.
+
+```bash
+pip install observers[docling]
+```
+
+For open telemetry, you can install the following:
+
+```bash
+pip install observers[opentelemetry]
+```
+
 ## Usage
 
 We differentiate between observers and stores. Observers wrap generative AI APIs (like OpenAI or llama-index) and track their interactions. Stores are classes that sync these observations to different storage backends (like DuckDB or Hugging Face datasets).
@@ -50,10 +62,12 @@ response = client.chat.completions.create(
 
 - [OpenAI](https://openai.com/) and every other LLM provider that implements the [OpenAI API message formate](https://platform.openai.com/docs/api-reference)
 - [AISuite](https://github.com/andrewyng/aisuite), which is an LLM router by Andrew Ng and which maps to [a lot of LLM API providers](https://github.com/andrewyng/aisuite/tree/main/aisuite/providers) with a uniform interface.
+- [Litellm](https://docs.litellm.ai/docs/), which is a library that allows you to use [a lot of different LLM APIs](https://docs.litellm.ai/docs/providers) with a uniform interface.
+- [Docling](https://github.com/docling/docling), Docling parses documents and exports them to the desired format with ease and speed. This observer allows you to wrap this and push popular document formats (PDF, DOCX, PPTX, XLSX, Images, HTML, AsciiDoc & Markdown) to the different stores.
 
 ### Change OpenAI compliant LLM provider
 
-The `wrap_openai` function allows you to wrap any OpenAI compliant LLM provider. Take a look at [the example doing this for Ollama](./examples/ollama_example.py) for more details.
+The `wrap_openai` function allows you to wrap any OpenAI compliant LLM provider. Take a look at [the example doing this for Ollama](./examples/observers/ollama_example.py) for more details.
 
 ## Stores
 
@@ -64,6 +78,9 @@ The `wrap_openai` function allows you to wrap any OpenAI compliant LLM provider.
 | [Hugging Face Datasets](https://huggingface.co/docs/huggingface_hub/en/package_reference/io-management#datasets) | [example](./examples/datasets_example.py) | ❌ | ❌ | ✅ | ✅ | ✅ |
 | [DuckDB](https://duckdb.org/) | [example](./examples/duckdb_example.py.py) | ❌ | ✅ | ✅ | ❌ | ✅ |
 | [Argilla](https://argilla.io/) | [example](./examples/argilla_example.py) | ✅ | ❌ | ✅ | ✅ | ❌ |
+| [OpenTelemetry](https://opentelemetry.io/) | [example](./examples/stores/opentelemetry_example.py) | ︖* | ︖* | ︖* | ︖* | ︖* |
+| [Honeycomb](https://honeycomb.io/) | [example](./examples/stores/opentelemetry_example.py) | ✅ |❌| ✅ | ✅ | ✅ |
+* These features, for the OpenTelemetry store, depend upon the provider you use
 
 ### Viewing / Querying
 
@@ -97,6 +114,10 @@ The default store is [DuckDB](https://duckdb.org/) and can be viewed and queried
 The Argilla Store allows you to sync your observations to [Argilla](https://argilla.io/). To use it, you first need to create a [free Argilla deployment on Hugging Face](https://docs.argilla.io/latest/getting_started/quickstart/). Take a look at [the example](./examples/argilla_example.py) for more details.
 
 ![Argilla Store](./assets/argilla.png)
+
+#### OpenTelemetry Store
+
+The OpenTelemetry "Store" allows you to sync your observations to any provider that supports OpenTelemetry! Examples are provided for [Honeycomb](https://honeycomb.io), but any provider that supplies OpenTelemetry compatible environment variables should Just Work®, and your queries will be executed as usual in your provider, against _trace_ data coming from Observers.
 
 ## Contributing
 

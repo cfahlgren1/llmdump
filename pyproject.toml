@@ -1,7 +1,7 @@
 [project]
 name = "observers"
-version = "0.1.2"
-description = "🤗 Observers: A lightweight library for (generative) AI observability, enabling insights into model interactions and everything that comes with it."
+version = "0.1.4"
+description = "🤗 Observers: A Lightweight Library for AI Observability"
 authors = [
     {name = "davidberenstein1957", email = "david.m.berenstein@gmail.com"},
 ]
@@ -40,6 +40,14 @@ dev = [
 ]
 litellm = [
     "litellm>=1.52",
+]
+docling = [
+    "docling>=2.8.0",
+]
+opentelemetry = [
+    "opentelemetry-api>=1.28.0",
+    "opentelemetry-sdk>=1.28.0",
+    "opentelemetry-exporter-otlp-proto-grpc>=1.28.0",
 ]
 
 [build-system]

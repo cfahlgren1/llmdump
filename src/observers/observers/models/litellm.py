@@ -4,13 +4,14 @@ from observers.observers.models.openai import wrap_openai
 from observers.stores.duckdb import DuckDBStore
 
 if TYPE_CHECKING:
+    from observers.stores.argilla import ArgillaStore
     from observers.stores.datasets import DatasetsStore
 
 
 # copy of openai wrap
 def wrap_litellm(
     client: Callable,
-    store: Optional[Union["DatasetsStore", DuckDBStore]] = None,
+    store: Optional[Union["DatasetsStore", DuckDBStore, "ArgillaStore"]] = None,
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
 ) -> Callable:

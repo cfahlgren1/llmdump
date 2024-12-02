@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from argilla import Argilla
     from openai import OpenAI
 
+    from observers.stores.argilla import ArgillaStore
     from observers.stores.datasets import DatasetsStore
 
 
@@ -21,7 +22,6 @@ class OpenAIResponseRecord(Record):
     Data class for storing OpenAI API response information
     """
 
-    id: str = field(default_factory=lambda: str(uuid.uuid4()))
     model: str = None
     timestamp: str = field(default_factory=lambda: datetime.datetime.now().isoformat())
     messages: List[ChatCompletionMessageParam] = None
@@ -32,10 +32,6 @@ class OpenAIResponseRecord(Record):
     finish_reason: str = None
     tool_calls: Optional[Any] = None
     function_call: Optional[Any] = None
-    tags: List[str] = None
-    properties: Dict[str, Any] = None
-    error: Optional[str] = None
-    raw_response: Optional[Dict] = None
 
     @classmethod
     def create(cls, response=None, error=None, **kwargs):
@@ -59,6 +55,27 @@ class OpenAIResponseRecord(Record):
             raw_response=dump,
             **kwargs,
         )
+
+    @property
+    def table_columns(self):
+        return [
+            "id",
+            "model",
+            "timestamp",
+            "messages",
+            "assistant_message",
+            "completion_tokens",
+            "prompt_tokens",
+            "total_tokens",
+            "finish_reason",
+            "tool_calls",
+            "function_call",
+            "tags",
+            "properties",
+            "error",
+            "raw_response",
+            "synced_at",
+        ]
 
     @property
     def duckdb_schema(self):
@@ -171,10 +188,18 @@ class OpenAIResponseRecord(Record):
             "messages",
         ]
 
+    @property
+    def image_fields(self):
+        return []
+
+    @property
+    def text_fields(self):
+        return []
+
 
 def wrap_openai(
     client: "OpenAI",
-    store: Optional[Union["DatasetsStore", DuckDBStore]] = None,
+    store: Optional[Union["DatasetsStore", DuckDBStore, "ArgillaStore"]] = None,
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
 ) -> "OpenAI":
@@ -190,6 +215,9 @@ def wrap_openai(
     if store is None:
         store = DuckDBStore.connect()
 
+    tags = tags or []
+    properties = properties or {}
+
     original_create = client.chat.completions.create
 
     def tracked_create(*args, **kwargs):
@@ -200,7 +228,7 @@ def wrap_openai(
                 response=response,
                 messages=kwargs.get("messages"),
                 model=kwargs.get("model"),
-                tags=tags or [],
+                tags=tags,
                 properties=properties,
             )
             store.add(entry)
@@ -211,7 +239,7 @@ def wrap_openai(
                 error=e,
                 messages=kwargs.get("messages"),
                 model=kwargs.get("model"),
-                tags=tags or [],
+                tags=tags,
                 properties=properties,
             )
             store.add(entry)
