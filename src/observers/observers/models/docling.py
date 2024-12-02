@@ -1,6 +1,4 @@
 import base64
-import inspect
-import warnings
 from dataclasses import dataclass
 from io import BytesIO
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
@@ -43,7 +41,7 @@ class DoclingRecord(Record):
     height: Optional[int] = None
     uri: Optional[str] = None
     text: Optional[str] = None
-    text_length: Optional[int] = None
+    caption_text: Optional[str] = None
     raw_response: Dict[str, Any] = None
 
     @classmethod
@@ -66,11 +64,15 @@ class DoclingRecord(Record):
         data["page_no"] = page.page_no if not isinstance(page, int) else page
         data["label"] = docling_object.label.value
         # get image info
-        if hasattr(docling_object, "image"):
-            image = docling_object.image.pil_image
-            docling_object.image.uri = None
-        else:
-            image = docling_object.get_image(document)
+        image = None
+        try:
+            if hasattr(docling_object, "image"):
+                image = docling_object.image.pil_image
+                docling_object.image.uri = None
+            else:
+                image = docling_object.get_image(document)
+        except Exception as e:
+            error = str(e)
         if image:
             data["mimetype"] = "image/png"  # PIL images are saved as PNG
             data["dpi"] = image.info.get(
@@ -84,33 +86,31 @@ class DoclingRecord(Record):
             img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
             data["image"] = {"bytes": img_str, "path": None}
 
-        # get caption or text
-        if hasattr(docling_object, "caption_text") and callable(
-            docling_object.caption_text
-        ):
-            data["text"] = docling_object.caption_text(document)
-        elif hasattr(docling_object, "export_to_html") and callable(
-            docling_object.export_to_html
-        ):
-            data["text"] = docling_object.export_to_html(document, add_caption=True)
-        elif hasattr(docling_object, "export_to_document_tokens") and callable(
-            docling_object.export_to_document_tokens
-        ):
-            export_to_document_tokens_params = inspect.signature(
-                docling_object.export_to_document_tokens
-            ).parameters
-            boolean_args = {
-                name: False
-                for name, param in export_to_document_tokens_params.items()
-                if param.annotation == bool
-            }
-            if "add_content" in boolean_args:
-                boolean_args["add_content"] = True
+        # get caption from image or table
+        caption_text = None
+        try:
+            if hasattr(docling_object, "caption_text") and callable(
+                docling_object.caption_text
+            ):
+                caption_text = docling_object.caption_text(document)
+                data["caption_text"] = caption_text if caption_text else None
+        except Exception as e:
+            error = str(e)
 
-            data["text"] = docling_object.export_to_document_tokens(
-                document, **boolean_args
-            )
-        data["text_length"] = len(data["text"])
+        # get table as html
+        if hasattr(docling_object, "export_to_dataframe") and callable(
+            docling_object.export_to_dataframe
+        ):
+            try:
+                data["text"] = docling_object.export_to_html(
+                    document, add_caption=False
+                )
+            except Exception as e:
+                error = str(e)
+
+        # get text from item
+        if hasattr(docling_object, "text"):
+            data["text"] = docling_object.text
 
         data["raw_response"] = docling_object.model_dump(mode="json")
         return cls(**data, tags=tags, properties=properties, error=error)
@@ -128,13 +128,17 @@ class DoclingRecord(Record):
         return ["image"]
 
     @property
+    def text_fields(self):
+        return ["text", "caption_text"]
+
+    @property
     def table_columns(self):
         return [
             "id",
             "filename",
             "label",
             "text",
-            "text_length",
+            "caption_text",
             "image",
             "width",
             "height",
@@ -158,7 +162,7 @@ class DoclingRecord(Record):
             filename VARCHAR,
             label VARCHAR,
             text VARCHAR,
-            text_length INTEGER,
+            caption_text VARCHAR,
             image STRUCT(bytes BLOB, path VARCHAR),
             width INTEGER,
             height INTEGER,
@@ -239,7 +243,8 @@ class DoclingRecord(Record):
                 rg.IntegerMetadataProperty(name="dpi", client=client),
                 rg.IntegerMetadataProperty(name="width", client=client),
                 rg.IntegerMetadataProperty(name="height", client=client),
-                rg.TermsMetadataProperty(name="text_length", client=client),
+                rg.IntegerMetadataProperty(name="text_length", client=client),
+                rg.IntegerMetadataProperty(name="caption_text_length", client=client),
             ],
         )
 
@@ -293,41 +298,32 @@ def wrap_docling(
                 isinstance(docling_object, (SectionHeaderItem, ListItem, TextItem))
                 and "texts" in media_types
             ):
-                try:
-                    record = DoclingRecord.create(
-                        docling_object=docling_object,
-                        document=document,
-                        page=page,
-                        tags=tags,
-                        properties=properties,
-                    )
-                    store.add(record)
-                except Exception as e:
-                    warnings.warn(f"Error creating record for {docling_object}: {e}")
+                record = DoclingRecord.create(
+                    docling_object=docling_object,
+                    document=document,
+                    page=page,
+                    tags=tags,
+                    properties=properties,
+                )
+                store.add(record)
             if isinstance(docling_object, PictureItem) and "pictures" in media_types:
-                try:
-                    record = DoclingRecord.create(
-                        docling_object=docling_object,
-                        document=document,
-                        page=page,
-                        tags=tags,
-                        properties=properties,
-                    )
-                    store.add(record)
-                except Exception as e:
-                    warnings.warn(f"Error creating record for {docling_object}: {e}")
+                record = DoclingRecord.create(
+                    docling_object=docling_object,
+                    document=document,
+                    page=page,
+                    tags=tags,
+                    properties=properties,
+                )
+                store.add(record)
             if isinstance(docling_object, TableItem) and "tables" in media_types:
-                try:
-                    record = DoclingRecord.create(
-                        docling_object=docling_object,
-                        document=document,
-                        page=page,
-                        tags=tags,
-                        properties=properties,
-                    )
-                    store.add(record)
-                except Exception as e:
-                    warnings.warn(f"Error creating record for {docling_object}: {e}")
+                record = DoclingRecord.create(
+                    docling_object=docling_object,
+                    document=document,
+                    page=page,
+                    tags=tags,
+                    properties=properties,
+                )
+                store.add(record)
 
     def convert(*args, **kwargs) -> "DoclingDocument":
         result = original_convert(*args, **kwargs)

@@ -33,7 +33,8 @@ def push_to_hub(self):
         for record in records:
             if record.get("image") and record["image"].get("path"):
                 image_path = Path(self.folder_path) / record["image"]["path"]
-                record["image"] = Image.open(image_path)
+                with Image.open(image_path) as img:
+                    record["image"] = img.copy()
             data.append(record)
 
         dataset = Dataset.from_list(data)

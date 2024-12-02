@@ -183,6 +183,10 @@ class OpenAIResponseRecord(Record):
     def image_fields(self):
         return []
 
+    @property
+    def text_fields(self):
+        return []
+
 
 def wrap_openai(
     client: "OpenAI",

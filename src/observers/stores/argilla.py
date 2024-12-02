@@ -105,5 +105,10 @@ class ArgillaStore(Store):
             self._init_table(record)
 
         record_dict = asdict(record)
+
+        for text_field in record.text_fields:
+            if text_field in record_dict:
+                record_dict[f"{text_field}_length"] = len(record_dict[text_field])
+
         record_dict = {k: v for k, v in record_dict.items() if k in self._dataset_keys}
         self._dataset.records.log([record_dict])
