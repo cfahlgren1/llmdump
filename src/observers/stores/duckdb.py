@@ -1,5 +1,6 @@
 import json
 import os
+import uuid
 from dataclasses import asdict, dataclass, field
 from typing import TYPE_CHECKING, List, Optional
 
@@ -38,9 +39,12 @@ class DuckDBStore(Store):
             path = os.path.join(os.getcwd(), DEFAULT_DB_NAME)
         return cls(path=path)
 
-    def _init_table(self, record: "Record"):
-        self._conn.execute(record.duckdb_schema)
-        self._tables.append(record.table_name)
+    def _init_table(self, record: "Record") -> str:
+        table_name = f"{record.table_name}_{uuid.uuid4().hex[:8]}"
+        duckdb_schema = record.duckdb_schema.replace(record.table_name, table_name)
+        self._conn.execute(duckdb_schema)
+        self._tables.append(table_name)
+        return table_name
 
     def _get_tables(self) -> List[str]:
         """Get all tables in the database"""
@@ -48,8 +52,11 @@ class DuckDBStore(Store):
 
     def add(self, record: "Record"):
         """Add a new record to the database"""
-        if record.table_name not in self._tables:
-            self._init_table(record)
+        table_name = next(
+            (table for table in self._tables if record.table_name in table), None
+        )
+        if not table_name:
+            table_name = self._init_table(record)
 
         record_dict = asdict(record)
         record_dict["synced_at"] = None
@@ -68,7 +75,7 @@ class DuckDBStore(Store):
             record_dict = sorted_dict
 
         self._conn.execute(
-            f"INSERT INTO {record.table_name} VALUES ({placeholders})",
+            f"INSERT INTO {table_name} VALUES ({placeholders})",
             [
                 record_dict[k] if k in record_dict else None
                 for k in record.table_columns

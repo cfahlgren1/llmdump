@@ -33,7 +33,8 @@ def push_to_hub(self):
         for record in records:
             if record.get("image") and record["image"].get("path"):
                 image_path = Path(self.folder_path) / record["image"]["path"]
-                record["image"] = Image.open(image_path)
+                with Image.open(image_path) as img:
+                    record["image"] = img.copy()
             data.append(record)
 
         dataset = Dataset.from_list(data)
@@ -93,8 +94,8 @@ class DatasetsStore(Store):
             shutil.rmtree(self._temp_dir)
 
     def _init_table(self, record: "Record"):
-        repo_name = self.repo_name or "my-dataset"
-        org_name = self.org_name or whoami(token=self.token)["name"]
+        repo_name = self.repo_name or f"{record.table_name}_{uuid.uuid4().hex[:8]}"
+        org_name = self.org_name or whoami(token=self.token).get("name")
         repo_id = f"{org_name}/{repo_name}"
         self._filename = f"{record.table_name}_{uuid.uuid4()}.json"
         self._scheduler = CommitScheduler(
