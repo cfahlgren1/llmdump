@@ -193,6 +193,13 @@ class DoclingRecord(Record):
                 ),
                 rg.TextField(
                     name="text",
+                    description="The text.",
+                    markdown=True,
+                    required=False,
+                    client=client,
+                ),
+                rg.TextField(
+                    name="caption_text",
                     description="The caption text.",
                     markdown=True,
                     required=False,
