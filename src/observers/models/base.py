@@ -22,6 +22,7 @@ class ChatCompletionRecord(Record):
 
     model: str = None
     timestamp: str = field(default_factory=lambda: datetime.datetime.now().isoformat())
+    arguments: Optional[Dict[str, Any]] = None
 
     messages: List[Message] = None
     assistant_message: Optional[str] = None
@@ -55,6 +56,7 @@ class ChatCompletionRecord(Record):
             "properties",
             "error",
             "raw_response",
+            "arguments",
             "synced_at",
         ]
 
@@ -65,7 +67,7 @@ class ChatCompletionRecord(Record):
             id VARCHAR PRIMARY KEY,
             model VARCHAR,
             timestamp TIMESTAMP,
-            messages STRUCT(role VARCHAR, content VARCHAR)[],
+            messages JSON,
             assistant_message TEXT,
             completion_tokens INTEGER,
             prompt_tokens INTEGER,
@@ -77,6 +79,7 @@ class ChatCompletionRecord(Record):
             properties JSON,
             error VARCHAR,
             raw_response JSON,
+            arguments JSON,
             synced_at TIMESTAMP
         )
         """
@@ -160,7 +163,14 @@ class ChatCompletionRecord(Record):
 
     @property
     def json_fields(self):
-        return ["tool_calls", "function_call", "tags", "properties", "raw_response"]
+        return [
+            "tool_calls",
+            "function_call",
+            "tags",
+            "properties",
+            "raw_response",
+            "arguments",
+        ]
 
     @property
     def image_fields(self):
@@ -241,6 +251,8 @@ class ChatCompletionObserver:
         response = None
         try:
             kwargs = self.handle_kwargs(kwargs)
+            excluded_args = {"model", "messages", "tags", "properties"}
+            arguments = {k: v for k, v in kwargs.items() if k not in excluded_args}
 
             input_data = self.format_input(messages, **kwargs)
             response = self.create_fn(**input_data)
@@ -249,6 +261,7 @@ class ChatCompletionObserver:
                 response,
                 tags=self.tags,
                 properties=self.properties,
+                arguments=arguments,
             )
             if random.random() < self.logging_rate:
                 self.store.add(record)
@@ -262,6 +275,7 @@ class ChatCompletionObserver:
                 model=kwargs.get("model"),
                 tags=self.tags,
                 properties=self.properties,
+                arguments=arguments,
             )
             self.store.add(record)
             raise
@@ -344,6 +358,8 @@ class AsyncChatCompletionObserver(ChatCompletionObserver):
         response = None
         try:
             kwargs = self.handle_kwargs(kwargs)
+            excluded_args = {"model", "messages", "tags", "properties"}
+            arguments = {k: v for k, v in kwargs.items() if k not in excluded_args}
 
             input_data = self.format_input(messages, **kwargs)
             response = await self.create_fn(**input_data)
@@ -352,6 +368,7 @@ class AsyncChatCompletionObserver(ChatCompletionObserver):
                 response,
                 tags=self.tags,
                 properties=self.properties,
+                arguments=arguments,
             )
             if random.random() < self.logging_rate:
                 await self.store.add_async(record)
@@ -364,6 +381,7 @@ class AsyncChatCompletionObserver(ChatCompletionObserver):
                 model=kwargs.get("model"),
                 tags=self.tags,
                 properties=self.properties,
+                arguments=arguments,
             )
             await self.store.add(record)
             raise
