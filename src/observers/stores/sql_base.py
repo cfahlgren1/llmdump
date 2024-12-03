@@ -30,21 +30,6 @@ class SQLStore(Store):
         pass
 
     @abstractmethod
-    def add(self, record: "Record"):
-        """Add a new record to the store"""
-        pass
-
-    @abstractmethod
-    def connect(self, path: Optional[str] = None):
-        """Connect to the store"""
-        pass
-
-    @abstractmethod
-    def _init_table(self, record: "Record"):
-        """Initialize the table"""
-        pass
-
-    @abstractmethod
     def get_unsynced(self, table_name: str) -> List[tuple]:
         """Retrieve unsynced records"""
         pass
