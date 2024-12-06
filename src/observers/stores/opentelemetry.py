@@ -72,18 +72,6 @@ class OpenTelemetryStore(Store):
             # added to a continuous trace
             with self.tracer.start_as_current_span(f"{self.namespace}.init") as span:
                 span.set_attribute("connected", True)
-                self.root_span = span
-
-    def add_dict(self, record: dict):
-        """Add a new record to the store"""
-        with trace.use_span(self.root_span):
-            with self.tracer.start_as_current_span(f"{self.namespace}.add") as span:
-                # Split out to be easily edited if the record api changes
-                flat_record = flatten_dict(record)
-                span.set_attribues(flat_record)
-                if record.messages:
-                    messages = [str(message) for message in record.messages]
-                    span.set_attribute("messages", messages)
 
     def add(self, record: Record, keys: list[str] = None):
         """Add a new record to the store"""
