@@ -79,7 +79,7 @@ class OpenTelemetryStore(Store):
         if keys:
             event_fields = keys
         else:
-                # Split out to be easily edited if the record api changes
+            # Split out to be easily edited if the record api changes
             event_fields = [
                 "assistant_message",
                 "completion_tokens",
@@ -91,16 +91,15 @@ class OpenTelemetryStore(Store):
                 "properties",
                 "model",
                 "timestamp",
-
                 "tags",
                 "id",
                 "error",
             ]
         with trace.use_span(self.root_span):
             if record.event_type:
-                span_name =f"{self.namespace}.{record.event_type}"
+                span_name = f"{self.namespace}.{record.event_type}"
             else:
-                span_name =f"{self.namespace}.add"
+                span_name = f"{self.namespace}.add"
             with self.tracer.start_as_current_span(span_name) as span:
                 for field in event_fields:
                     data = record.__getattribute__(field)
