@@ -93,6 +93,7 @@ class OpenAIResponseRecord(Record):
             "error",
             "raw_response",
             "synced_at",
+            "arguments",
         ]
 
     @property
@@ -114,7 +115,8 @@ class OpenAIResponseRecord(Record):
             properties JSON,
             error VARCHAR,
             raw_response JSON,
-            synced_at TIMESTAMP
+            synced_at TIMESTAMP,
+            arguments JSON
         )
         """
 
@@ -153,6 +155,13 @@ class OpenAIResponseRecord(Record):
                     name="properties",
                     template="{{ json record.fields.properties }}",
                     description="The properties associated with the response.",
+                    required=False,
+                    _client=client,
+                ),
+                rg.CustomField(
+                    name="arguments",
+                    template="{{ json record.fields.arguments }}",
+                    description="The arguments passed to the OpenAI API.",
                     required=False,
                     _client=client,
                 ),
@@ -197,7 +206,14 @@ class OpenAIResponseRecord(Record):
 
     @property
     def json_fields(self):
-        return ["tool_calls", "function_call", "tags", "properties", "raw_response"]
+        return [
+            "tool_calls",
+            "function_call",
+            "tags",
+            "properties",
+            "raw_response",
+            "arguments",
+        ]
 
     @property
     def image_fields(self):
@@ -261,6 +277,7 @@ def wrap_openai(
                 model=kwargs.get("model"),
                 tags=tags,
                 properties=properties,
+                arguments=additional_kwargs,
                 **additional_kwargs,
             )
             store.add(entry)
