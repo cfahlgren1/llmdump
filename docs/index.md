@@ -75,10 +75,10 @@ The `wrap_openai` function allows you to wrap any OpenAI compliant LLM provider.
 
 | Store | Example | Annotate | Local | Free | UI filters | SQL filters |
 |-------|---------|----------|-------|------|-------------|--------------|
-| [Hugging Face Datasets](https://huggingface.co/docs/huggingface_hub/en/package_reference/io-management#datasets) | [example](./examples/stores/datasets_example.py) | ❌ | ❌ | ✅ | ✅ | ✅ |
+| [Hugging Face Datasets](https://huggingface.co/docs/huggingface_hub/en/package_reference/io-management#datasets) | [example](https://github.com/cfahlgren1/observers/blob/main/examples/stores/datasets_example.py) | ❌ | ❌ | ✅ | ✅ | ✅ |
 | [DuckDB](https://duckdb.org/) | [example](./examples/stores/duckdb_example.py) | ❌ | ✅ | ✅ | ❌ | ✅ |
 | [Argilla](https://argilla.io/) | [example](./examples/stores/argilla_example.py) | ✅ | ❌ | ✅ | ✅ | ❌ |
-| [OpenTelemetry](https://opentelemetry.io/) | [example](./examples/stores/opentelemetry_example.py) | ︖* | ︖* | ︖* | ︖* | ︖* |
+| [OpenTelemetry](https://opentelemetry.io/) | [example](https://opentelemetry.io/) | ︖* | ︖* | ︖* | ︖* | ︖* |
 | [Honeycomb](https://honeycomb.io/) | [example](./examples/stores/opentelemetry_example.py) | ✅ |❌| ✅ | ✅ | ✅ |
 * These features, for the OpenTelemetry store, depend upon the provider you use
 
@@ -86,13 +86,13 @@ The `wrap_openai` function allows you to wrap any OpenAI compliant LLM provider.
 
 #### Hugging Face Datasets Store
 
-To view and query Hugging Face Datasets, you can use the [Hugging Face Datasets Viewer](https://huggingface.co/docs/hub/en/datasets-viewer). You can [find example datasets on the Hugging Face Hub](https://huggingface.co/datasets?other=observers). From within here, you can query the dataset using SQL or using your own UI. Take a look at [the example](./examples/stores/datasets_example.py) for more details.
+To view and query Hugging Face Datasets, you can use the [Hugging Face Datasets Viewer](https://huggingface.co/docs/hub/en/datasets-viewer). You can [find example datasets on the Hugging Face Hub](https://huggingface.co/datasets?other=observers). From within here, you can query the dataset using SQL or using your own UI. Take a look at [the example](https://github.com/cfahlgren1/observers/blob/main/examples/stores/datasets_example.py) for more details.
 
 ![Hugging Face Datasets Viewer](https://raw.githubusercontent.com/cfahlgren1/observers/main/assets/datasets.png)
 
 #### DuckDB Store
 
-The default store is [DuckDB](https://duckdb.org/) and can be viewed and queried using the [DuckDB CLI](https://duckdb.org/#quickinstall). Take a look at [the example](./examples/stores/duckdb_example.py) for more details.
+The default store is [DuckDB](https://duckdb.org/) and can be viewed and queried using the [DuckDB CLI](https://duckdb.org/#quickinstall). Take a look at [the example](https://github.com/cfahlgren1/observers/blob/main/examples/stores/duckdb_example.py) for more details.
 
 ```bash
 > duckdb store.db
@@ -121,4 +121,4 @@ The OpenTelemetry "Store" allows you to sync your observations to any provider t
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md)
+See [CONTRIBUTING.md](https://github.com/cfahlgren1/observers/blob/main/CONTRIBUTING.md)
