@@ -24,7 +24,7 @@ theme:
         icon: material/weather-night
         name: Light mode
       primary: black
-      accent: deep orange
+      accent: deep blue
 
 markdown_extensions:
   - attr_list
