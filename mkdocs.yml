@@ -1,7 +1,30 @@
-site_name: My Docs
-site_url: https://argilla-io.github.io/observers
-site_author: Argilla, Inc.
-site_description: Distilabel is an AI Feedback (AIF) framework for building datasets with and for LLMs.
+site_name: Observers Docs
+site_url: https://observers-io.github.io/observers
+site_author: Parag Ekbote
+site_description: A Lightweight Library for AI Observability
+theme:
+  name: material
+  font:
+    text: Merriweather Sans
+    code: Red Hat Mono
+  features:
+    - navigation.footer
+  palette:
+    # Dark Mode
+    - scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Dark mode
+      primary: green
+      accent: deep purple
+
+    # Light Mode
+    - scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Light mode
+      primary: black
+      accent: deep orange
 
 # Repository
 repo_name: cfahlgren1/observers

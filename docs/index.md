@@ -67,7 +67,7 @@ response = client.chat.completions.create(
 
 ### Change OpenAI compliant LLM provider
 
-The `wrap_openai` function allows you to wrap any OpenAI compliant LLM provider. Take a look at [the example doing this for Ollama](./examples/observers/ollama_example.py) for more details.
+The `wrap_openai` function allows you to wrap any OpenAI compliant LLM provider. Take a look at [the example doing this for Ollama](https://github.com/ParagEkbote/observers/blob/main/examples/observers/ollama_example.py) for more details.
 
 ## Stores
 
@@ -76,9 +76,9 @@ The `wrap_openai` function allows you to wrap any OpenAI compliant LLM provider.
 | Store | Example | Annotate | Local | Free | UI filters | SQL filters |
 |-------|---------|----------|-------|------|-------------|--------------|
 | [Hugging Face Datasets](https://huggingface.co/docs/huggingface_hub/en/package_reference/io-management#datasets) | [example](https://github.com/cfahlgren1/observers/blob/main/examples/stores/datasets_example.py) | ❌ | ❌ | ✅ | ✅ | ✅ |
-| [DuckDB](https://duckdb.org/) | [example](./examples/stores/duckdb_example.py) | ❌ | ✅ | ✅ | ❌ | ✅ |
-| [Argilla](https://argilla.io/) | [example](./examples/stores/argilla_example.py) | ✅ | ❌ | ✅ | ✅ | ❌ |
-| [OpenTelemetry](https://opentelemetry.io/) | [example](https://opentelemetry.io/) | ︖* | ︖* | ︖* | ︖* | ︖* |
+| [DuckDB](https://duckdb.org/) | [example](https://github.com/ParagEkbote/observers/blob/main/examples/stores/duckdb_example.py) | ❌ | ✅ | ✅ | ❌ | ✅ |
+| [Argilla](https://argilla.io/) | [example](https://github.com/ParagEkbote/observers/blob/main/examples/stores/argilla_example.py) | ✅ | ❌ | ✅ | ✅ | ❌ |
+| [OpenTelemetry](https://opentelemetry.io/) | [example](https://github.com/ParagEkbote/observers/blob/main/examples/stores/opentelemetry_example.py) | ︖* | ︖* | ︖* | ︖* | ︖* |
 | [Honeycomb](https://honeycomb.io/) | [example](./examples/stores/opentelemetry_example.py) | ✅ |❌| ✅ | ✅ | ✅ |
 * These features, for the OpenTelemetry store, depend upon the provider you use
 
@@ -111,7 +111,7 @@ The default store is [DuckDB](https://duckdb.org/) and can be viewed and queried
 
 #### Argilla Store
 
-The Argilla Store allows you to sync your observations to [Argilla](https://argilla.io/). To use it, you first need to create a [free Argilla deployment on Hugging Face](https://docs.argilla.io/latest/getting_started/quickstart/). Take a look at [the example](./examples/stores/argilla_example.py) for more details.
+The Argilla Store allows you to sync your observations to [Argilla](https://argilla.io/). To use it, you first need to create a [free Argilla deployment on Hugging Face](https://docs.argilla.io/latest/getting_started/quickstart/). Take a look at [the example](https://github.com/ParagEkbote/observers/blob/main/examples/stores/argilla_example.py) for more details.
 
 ![Argilla Store](https://raw.githubusercontent.com/cfahlgren1/observers/main/assets/argilla.png)
 
