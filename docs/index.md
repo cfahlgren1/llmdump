@@ -80,7 +80,8 @@ The `wrap_openai` function allows you to wrap any OpenAI compliant LLM provider.
 | [Argilla](https://argilla.io/) | [example](https://github.com/ParagEkbote/observers/blob/main/examples/stores/argilla_example.py) | ✅ | ❌ | ✅ | ✅ | ❌ |
 | [OpenTelemetry](https://opentelemetry.io/) | [example](https://github.com/ParagEkbote/observers/blob/main/examples/stores/opentelemetry_example.py) | ︖* | ︖* | ︖* | ︖* | ︖* |
 | [Honeycomb](https://honeycomb.io/) | [example](./examples/stores/opentelemetry_example.py) | ✅ |❌| ✅ | ✅ | ✅ |
-* These features, for the OpenTelemetry store, depend upon the provider you use
+
+(*) These features for the OpenTelemetry store, depend upon the provider you use.
 
 ### Viewing / Querying
 
@@ -121,4 +122,5 @@ The OpenTelemetry "Store" allows you to sync your observations to any provider t
 
 ## Contributing
 
-See [CONTRIBUTING.md](https://github.com/cfahlgren1/observers/blob/main/CONTRIBUTING.md)
+We ❤️ open-source contributions.See [CONTRIBUTING](https://github.com/cfahlgren1/observers/blob/main/CONTRIBUTING.md)
+for more details.

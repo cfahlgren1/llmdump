@@ -30,3 +30,8 @@ theme:
 repo_name: cfahlgren1/observers
 repo_url: https://github.com/cfahlgren1/observers
 edit_uri: edit/main/docs/
+
+extra:
+  social:
+    - icon: simple/github
+      link: https://github.com/cfahlgren1/observers
