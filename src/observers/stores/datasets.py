@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, List, Optional
 
 from datasets import Dataset
 from datasets import Image as DatasetImage
+from datasets.utils.logging import disable_progress_bar
 from huggingface_hub import CommitScheduler, login, metadata_update, upload_file, whoami
 from PIL import Image
 
@@ -20,6 +21,9 @@ from observers.stores.base import Store
 
 if TYPE_CHECKING:
     from observers.observers.base import Record
+
+
+disable_progress_bar()
 
 
 def push_to_hub(self):
@@ -115,6 +119,10 @@ class DatasetsStore(Store):
             shutil.rmtree(self._temp_dir)
 
     def _init_table(self, record: "Record"):
+        import logging
+
+        logging.getLogger("huggingface_hub").setLevel(logging.ERROR)
+
         repo_name = self.repo_name or f"{record.table_name}_{uuid.uuid4().hex[:8]}"
         org_name = self.org_name or whoami(token=self.token).get("name")
         repo_id = f"{org_name}/{repo_name}"
