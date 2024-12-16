@@ -29,4 +29,3 @@ for model in models:
         model=model, messages=messages, temperature=0.75
     )
     print(response.choices[0].message.content)
-    print(response.choices[0].message.content)

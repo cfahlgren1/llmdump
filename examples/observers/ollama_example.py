@@ -10,6 +10,3 @@ client = wrap_openai(openai_client)
 response = client.chat.completions.create(
     model="llama3.1", messages=[{"role": "user", "content": "Tell me a joke."}]
 )
-response = client.chat.completions.create(
-    model="llama3.1", messages=[{"role": "user", "content": "Tell me a joke."}]
-)

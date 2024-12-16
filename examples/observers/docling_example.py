@@ -23,4 +23,3 @@ converter = wrap_docling(converter, media_types=["pictures", "tables"])
 url = "https://arxiv.org/pdf/2408.09869"
 converted = converter.convert(url)
 converted = converter.convert_all([url])
-converted = converter.convert_all([url])
