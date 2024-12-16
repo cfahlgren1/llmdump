@@ -5,6 +5,7 @@ import json
 import os
 import tempfile
 import uuid
+import warnings
 from dataclasses import asdict, dataclass, field
 from io import BytesIO
 from pathlib import Path
@@ -12,7 +13,8 @@ from typing import TYPE_CHECKING, List, Optional
 
 from datasets import Dataset
 from datasets import Image as DatasetImage
-from huggingface_hub import CommitScheduler, login, metadata_update, whoami
+from datasets.utils.logging import disable_progress_bar
+from huggingface_hub import CommitScheduler, login, metadata_update, upload_file, whoami
 from PIL import Image
 
 from observers.stores.base import Store
@@ -21,24 +23,50 @@ if TYPE_CHECKING:
     from observers.observers.base import Record
 
 
+disable_progress_bar()
+
+
 def push_to_hub(self):
     """Push pending changes to the Hugging Face Hub"""
-    with self.lock:
-        records = [
-            json.loads(line)
-            for json_file in Path(self.folder_path).rglob("*.json")
-            for line in open(json_file)
+    json_files = Path(self.folder_path).rglob("*.json")
+    records = [json.loads(line) for json_file in json_files for line in open(json_file)]
+
+    if records:
+        image_keys: List[json.Any] = [
+            key
+            for key in records[0].keys()
+            if isinstance(records[0][key], dict) and "path" in records[0][key]
         ]
 
         for record in records:
-            if "image" in record and "path" in record["image"]:
-                image_path = Path(self.folder_path) / record["image"]["path"]
-                record["image"] = str(image_path)
+            for key in image_keys:
+                record[key] = str(Path(self.folder_path) / record[key]["path"])
 
-        dataset = Dataset.from_list(records).cast_column("image", DatasetImage())
-        dataset.push_to_hub(
-            repo_id=self.repo_id, token=self.token, private=self.private
-        )
+        dataset = Dataset.from_list(records)
+        for key in image_keys:
+            dataset = dataset.cast_column(key, DatasetImage())
+
+        with self.lock:
+            buffer = BytesIO()
+            dataset.to_parquet(buffer)
+            buffer.seek(0)
+            random_id = uuid.uuid4().hex
+            filename = f"data/train-{random_id}.parquet"
+            upload_file(
+                path_or_fileobj=buffer,
+                path_in_repo=filename,
+                repo_id=self.repo_id,
+                repo_type="dataset",
+                token=self.token,
+                commit_message=f"Upload {filename}",
+            )
+
+            # Delete all json files
+            for json_file in json_files:
+                try:
+                    json_file.unlink()
+                except Exception as e:
+                    warnings.warn(f"Failed to delete {json_file}: {e}")
 
 
 CommitScheduler.push_to_hub = push_to_hub
@@ -91,6 +119,10 @@ class DatasetsStore(Store):
             shutil.rmtree(self._temp_dir)
 
     def _init_table(self, record: "Record"):
+        import logging
+
+        logging.getLogger("huggingface_hub").setLevel(logging.ERROR)
+
         repo_name = self.repo_name or f"{record.table_name}_{uuid.uuid4().hex[:8]}"
         org_name = self.org_name or whoami(token=self.token).get("name")
         repo_id = f"{org_name}/{repo_name}"
@@ -114,6 +146,7 @@ class DatasetsStore(Store):
             metadata={"tags": ["observers", record.table_name.split("_")[0]]},
             repo_type="dataset",
             token=self.token,
+            overwrite=True,
         )
 
     @classmethod
