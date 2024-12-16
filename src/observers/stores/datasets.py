@@ -138,6 +138,7 @@ class DatasetsStore(Store):
             metadata={"tags": ["observers", record.table_name.split("_")[0]]},
             repo_type="dataset",
             token=self.token,
+            overwrite=True,
         )
 
     @classmethod
