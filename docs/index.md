@@ -36,9 +36,11 @@ pip install observers[opentelemetry]
 
 ## Usage
 
-We differentiate between observers and stores. Observers wrap generative AI APIs (like OpenAI or llama-index) and track their interactions. Stores are classes that sync these observations to different storage backends (like DuckDB or Hugging Face datasets).
+To get started, you can run this example code below. It sends requests to a HF serverless endpoint and log the interactions into a Hub dataset, using the default store `DatasetsStore`.
 
-To get started you can run the code below. It sends requests to a HF serverless endpoint and log the interactions into a Hub dataset, using the default store `DatasetsStore`. The dataset will be pushed to your personal workspace (http://hf.co/{your_username}). To learn how to configure stores, go to the next section.
+The dataset will be pushed to your personal workspace (http://hf.co/{your_username}). 
+
+We differentiate between observers and stores.To know more, check out the next section.
 
 ```py
 from observers.observers import wrap_openai
