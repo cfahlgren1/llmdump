@@ -2,7 +2,9 @@ Observers wrap generative AI APIs (like OpenAI or llama-index) and track their i
 
 ### Supported Observers
 
-1) [OpenAI](https://openai.com/) and every other LLM provider that implements the [OpenAI API message format](https://platform.openai.com/docs/api-reference).
+### OpenAI
+
+[OpenAI](https://openai.com/) and every other LLM provider that implements the [OpenAI API message format](https://platform.openai.com/docs/api-reference).
 
 The `wrap_openai` function allows you to wrap any OpenAI compliant LLM provider. Take a look at this example for more details.
 
@@ -21,7 +23,9 @@ response = client.chat.completions.create(
 
 ```
 
-2) [AISuite](https://github.com/andrewyng/aisuite), which is an LLM router by Andrew Ng and which maps to  a lot of [ LLM API providers](https://github.com/andrewyng/aisuite/tree/main/aisuite/providers) with a uniform interface.
+### AISuite
+
+[AISuite](https://github.com/andrewyng/aisuite), which is an LLM router by Andrew Ng and which maps to  a lot of [ LLM API providers](https://github.com/andrewyng/aisuite/tree/main/aisuite/providers) with a uniform interface.
 
 To know more, take a look at this example:
 
@@ -50,7 +54,9 @@ for model in models:
 
 ```
 
-3) [Litellm](https://docs.litellm.ai/docs/), which is a library that allows you to use a lot of different [LLM APIs](https://docs.litellm.ai/docs/providers) with a uniform interface.
+### Litellm
+
+[Litellm](https://docs.litellm.ai/docs/), which is a library that allows you to use a lot of different [LLM APIs](https://docs.litellm.ai/docs/providers) with a uniform interface.
 
 To know more, take a look at this example:
 
@@ -79,7 +85,9 @@ for model in models:
 
 ```
 
-4) [Docling](https://github.com/docling/docling) parses documents and exports them to the desired format with ease and speed.
+### Docling
+
+[Docling](https://github.com/docling/docling) parses documents and exports them to the desired format with ease and speed.
 
 This observer allows you to wrap this and push popular document formats (PDF, DOCX, PPTX, XLSX, Images, HTML, AsciiDoc & Markdown) to the different stores.
 
