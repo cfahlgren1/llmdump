@@ -1,7 +1,8 @@
 from docling.datamodel.base_models import InputFormat
 from docling.datamodel.pipeline_options import PdfPipelineOptions
 from docling.document_converter import DocumentConverter, PdfFormatOption
-from observers.observers.models.docling import wrap_docling
+
+from observers import wrap_docling
 
 # Configure PDF pipeline options
 pipeline_options = PdfPipelineOptions(
@@ -21,4 +22,5 @@ converter = wrap_docling(converter, media_types=["pictures", "tables"])
 # Convert single and multiple documents
 url = "https://arxiv.org/pdf/2408.09869"
 converted = converter.convert(url)
+converted = converter.convert_all([url])
 converted = converter.convert_all([url])

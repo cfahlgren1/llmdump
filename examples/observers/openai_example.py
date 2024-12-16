@@ -1,7 +1,8 @@
 import os
 
-from observers.observers import wrap_openai
 from openai import OpenAI
+
+from observers import wrap_openai
 
 openai_client = OpenAI(
     base_url="https://api-inference.huggingface.co/v1/", api_key=os.getenv("HF_TOKEN")

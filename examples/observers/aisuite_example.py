@@ -1,7 +1,8 @@
 import os
 
 import aisuite as ai
-from observers.observers import wrap_aisuite
+
+from observers import wrap_aisuite
 
 # Initialize AI Suite client
 client = ai.Client()
@@ -27,4 +28,5 @@ for model in models:
     response = client.chat.completions.create(
         model=model, messages=messages, temperature=0.75
     )
+    print(response.choices[0].message.content)
     print(response.choices[0].message.content)

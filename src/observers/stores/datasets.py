@@ -20,7 +20,7 @@ from PIL import Image
 from observers.stores.base import Store
 
 if TYPE_CHECKING:
-    from observers.observers.base import Record
+    from observers.base import Record
 
 
 disable_progress_bar()

@@ -1,8 +1,9 @@
-from observers.observers import wrap_openai
-from observers.stores.opentelemetry import OpenTelemetryStore
-from openai import OpenAI
 import os
 
+from openai import OpenAI
+
+from observers import wrap_openai
+from observers.stores.opentelemetry import OpenTelemetryStore
 
 # Use your usual environment variables to configure OpenTelemetry
 # Here's an example for Honeycomb
@@ -27,4 +28,5 @@ response = client.chat.completions.create(
 response = client.chat.completions.create(
     model="gpt-4o", messages=[{"role": "user", "content": "Tell me another joke."}]
 )
+# Now query your Opentelemetry Compatible observability store as you usually do!
 # Now query your Opentelemetry Compatible observability store as you usually do!
