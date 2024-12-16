@@ -28,9 +28,6 @@ def push_to_hub(self):
     records = [json.loads(line) for json_file in json_files for line in open(json_file)]
 
     if records:
-        # import pdb
-
-        # pdb.set_trace()
         image_keys: List[json.Any] = [
             key
             for key in records[0].keys()
@@ -60,7 +57,7 @@ def push_to_hub(self):
                 commit_message=f"Upload {filename}",
             )
 
-            # Move all json files to a processed folder
+            # Delete all json files
             for json_file in json_files:
                 try:
                     json_file.unlink()
