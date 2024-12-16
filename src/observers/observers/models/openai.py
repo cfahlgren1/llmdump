@@ -229,6 +229,7 @@ def wrap_openai(
     store: Optional[Union["DatasetsStore", DuckDBStore, "ArgillaStore"]] = None,
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
+    ignore_errors: bool = False,
 ) -> "OpenAI":
     """
     Wrap OpenAI client to track API calls in a Store.
@@ -270,17 +271,18 @@ def wrap_openai(
             additional_kwargs = {
                 k: v for k, v in kwargs.items() if k not in ["model", "messages"]
             }
+            if not ignore_errors:
 
-            entry = OpenAIResponseRecord.create(
-                error=e,
-                messages=kwargs.get("messages"),
-                model=kwargs.get("model"),
-                tags=tags,
-                properties=properties,
-                arguments=additional_kwargs,
-                **additional_kwargs,
-            )
-            store.add(entry)
+                entry = OpenAIResponseRecord.create(
+                    error=e,
+                    messages=kwargs.get("messages"),
+                    model=kwargs.get("model"),
+                    tags=tags,
+                    properties=properties,
+                    arguments=additional_kwargs,
+                    **additional_kwargs,
+                )
+                store.add(entry)
             raise
 
     client.chat.completions.create = tracked_create
