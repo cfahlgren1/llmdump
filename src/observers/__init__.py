@@ -7,11 +7,9 @@ from .models.docling import wrap_docling
 from .models.hf_client import wrap_hf_client
 from .models.litellm import wrap_litellm
 
-# Core imports that are always available
 from .models.openai import OpenAIRecord, wrap_openai
 from .models.transformers import TransformersRecord, wrap_transformers
 
-# from .models.transformers import TransformersRecord, wrap_transformers
 from .stores.base import Store
 from .stores.datasets import DatasetsStore
 
@@ -30,7 +28,6 @@ __all__: List[str] = [
     "wrap_hf_client",
 ]
 
-# Optional dependencies with conditional imports
 if importlib.util.find_spec("argilla") is not None:
     from .stores.argilla import ArgillaStore
 
@@ -41,11 +38,7 @@ if importlib.util.find_spec("duckdb") is not None:
 
     __all__ += ["DuckDBStore"]
 
-# You could add more optional integrations here
 OPTIONAL_DEPENDENCIES = {
     "argilla": ("argilla", "ArgillaStore"),
     "duckdb": ("duckdb", "DuckDBStore"),
-    # Add more as needed:
-    # "redis": ("redis", "RedisStore"),
-    # "mongodb": ("pymongo", "MongoStore"),
 }
