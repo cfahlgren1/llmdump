@@ -4,6 +4,7 @@ from litellm import completion
 
 from observers import wrap_litellm
 
+
 # Ensure you have both API keys set in environment variables
 os.environ["OPENAI_API_KEY"] = "your-api-key"
 os.environ["ANTHROPIC_API_KEY"] = "your-api-key"

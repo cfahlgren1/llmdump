@@ -11,8 +11,8 @@ from observers.models.base import (
 )
 from observers.stores.datasets import DatasetsStore
 
-if TYPE_CHECKING:
 
+if TYPE_CHECKING:
     from observers.stores.duckdb import DuckDBStore
 
 
@@ -28,10 +28,10 @@ class OpenAIRecord(ChatCompletionRecord):
         dump = response.model_dump()
         choices = dump.get("choices", [{}])[0].get("message", {})
         usage = dump.get("usage", {})
-
+        model = kwargs.pop("model", dump.get("model"))
         return cls(
             id=response.id if response.id else str(uuid.uuid4()),
-            model=dump.get("model"),
+            model=model,
             completion_tokens=usage.get("completion_tokens"),
             prompt_tokens=usage.get("prompt_tokens"),
             total_tokens=usage.get("total_tokens"),

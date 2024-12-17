@@ -7,6 +7,7 @@ from typing_extensions import Self
 from observers.base import Message, Record
 from observers.stores.datasets import DatasetsStore
 
+
 if TYPE_CHECKING:
     from argilla import Argilla
 

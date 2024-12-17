@@ -3,6 +3,7 @@ from openai import OpenAI
 from observers import wrap_openai
 from observers.stores import DatasetsStore
 
+
 store = DatasetsStore(
     repo_name="gpt-4o-mini-vision-traces",
     every=5,  # sync every 5 minutes
@@ -30,5 +31,4 @@ response = client.chat.completions.create(
     max_tokens=300,
 )
 
-print(response.choices[0].message.content)
 print(response.choices[0].message.content)
