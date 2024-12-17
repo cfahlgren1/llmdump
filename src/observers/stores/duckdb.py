@@ -59,7 +59,6 @@ class DuckDBStore(SQLStore):
             self._init_table(record)
 
         record_dict = asdict(record)
-        record_dict["synced_at"] = None
 
         for json_field in record.json_fields:
             if record_dict[json_field]:
