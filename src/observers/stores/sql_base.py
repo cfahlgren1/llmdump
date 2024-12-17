@@ -30,16 +30,6 @@ class SQLStore(Store):
         pass
 
     @abstractmethod
-    def get_unsynced(self, table_name: str) -> List[tuple]:
-        """Retrieve unsynced records"""
-        pass
-
-    @abstractmethod
-    def mark_as_synced(self, record_ids: List[str], table_name: str) -> None:
-        """Mark specified records as synced"""
-        pass
-
-    @abstractmethod
     def close(self) -> None:
         """Close the database connection"""
         pass
