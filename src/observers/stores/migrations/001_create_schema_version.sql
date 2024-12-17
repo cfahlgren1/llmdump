@@ -5,6 +5,25 @@ CREATE TABLE IF NOT EXISTS schema_version (
     checksum VARCHAR
 );
 
+CREATE TABLE IF NOT EXISTS openai_records (
+    id VARCHAR PRIMARY KEY,
+    model VARCHAR,
+    timestamp TIMESTAMP,
+    messages STRUCT(role VARCHAR, content VARCHAR)[],
+    assistant_message TEXT,
+    completion_tokens INTEGER,
+    prompt_tokens INTEGER,
+    total_tokens INTEGER,
+    finish_reason VARCHAR,
+    tool_calls JSON,
+    function_call JSON,
+    tags VARCHAR[],
+    properties JSON,
+    error VARCHAR,
+    raw_response JSON,
+    arguments JSON
+);
+
 -- Initialize with version 0 if table is empty
 INSERT INTO schema_version (version, migration_name) 
 SELECT 0, 'initial' 
