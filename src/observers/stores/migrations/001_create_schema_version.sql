@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS openai_records (
     id VARCHAR PRIMARY KEY,
     model VARCHAR,
     timestamp TIMESTAMP,
-    messages STRUCT(role VARCHAR, content VARCHAR)[],
+    messages JSON,
     assistant_message TEXT,
     completion_tokens INTEGER,
     prompt_tokens INTEGER,

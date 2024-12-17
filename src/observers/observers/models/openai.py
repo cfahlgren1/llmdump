@@ -102,7 +102,7 @@ class OpenAIResponseRecord(Record):
             id VARCHAR PRIMARY KEY,
             model VARCHAR,
             timestamp TIMESTAMP,
-            messages STRUCT(role VARCHAR, content VARCHAR)[],
+            messages JSON,
             assistant_message TEXT,
             completion_tokens INTEGER,
             prompt_tokens INTEGER,
@@ -205,6 +205,7 @@ class OpenAIResponseRecord(Record):
     @property
     def json_fields(self):
         return [
+            "messages",
             "tool_calls",
             "function_call",
             "tags",
