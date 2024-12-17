@@ -40,7 +40,7 @@ class OpenAIResponseRecord(Record):
         tags = kwargs.pop("tags", None)
         properties = kwargs.pop("properties", None)
 
-        arguments = kwargs
+        arguments = kwargs if kwargs else None
 
         if not response:
             return cls(
@@ -277,7 +277,7 @@ def wrap_openai(
                     model=kwargs.get("model"),
                     tags=tags,
                     properties=properties,
-                    arguments=additional_kwargs,
+                    arguments=additional_kwargs if additional_kwargs else None,
                     **additional_kwargs,
                 )
                 store.add(entry)
