@@ -92,7 +92,6 @@ class OpenAIResponseRecord(Record):
             "properties",
             "error",
             "raw_response",
-            "synced_at",
             "arguments",
         ]
 
@@ -115,7 +114,6 @@ class OpenAIResponseRecord(Record):
             properties JSON,
             error VARCHAR,
             raw_response JSON,
-            synced_at TIMESTAMP,
             arguments JSON
         )
         """
