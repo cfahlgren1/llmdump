@@ -1,9 +1,10 @@
 import uuid
+from dataclasses import asdict
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-import huggingface_hub
 from typing_extensions import Self
-from dataclasses import asdict
+
+from huggingface_hub import AsyncInferenceClient, InferenceClient
 from observers.models.base import (
     AsyncChatCompletionObserver,
     ChatCompletionObserver,
@@ -11,8 +12,8 @@ from observers.models.base import (
 )
 from observers.stores.datasets import DatasetsStore
 
-if TYPE_CHECKING:
 
+if TYPE_CHECKING:
     from observers.stores.duckdb import DuckDBStore
 
 
@@ -44,12 +45,12 @@ class HFRecord(ChatCompletionRecord):
 
 
 def wrap_hf_client(
-    client: huggingface_hub.InferenceClient | huggingface_hub.AsyncInferenceClient,
+    client: Union[InferenceClient, AsyncInferenceClient],
     store: Optional[Union["DuckDBStore", DatasetsStore]] = None,
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
 ) -> ChatCompletionObserver:
-    if isinstance(client, huggingface_hub.AsyncInferenceClient):
+    if isinstance(client, AsyncInferenceClient):
         return AsyncChatCompletionObserver(
             client=client,
             create=client.chat.completions.create,

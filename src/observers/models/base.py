@@ -325,7 +325,7 @@ class AsyncChatCompletionObserver(ChatCompletionObserver):
                 properties=self.properties,
             )
 
-            await self.store.add(record)
+            await self.store.add_async(record)
             return response
 
         except Exception as e:
@@ -343,5 +343,4 @@ class AsyncChatCompletionObserver(ChatCompletionObserver):
         return self
 
     async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
-        if hasattr(self.store, "close"):
-            await self.store.close()
+        await self.store.close_async()

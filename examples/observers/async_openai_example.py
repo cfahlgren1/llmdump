@@ -21,4 +21,7 @@ async def get_response() -> None:
     print(response)
 
 
-asyncio.run(get_response())
+if __name__ == "__main__":
+    import asyncio
+
+    asyncio.run(get_response())

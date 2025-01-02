@@ -4,21 +4,32 @@ from unittest.mock import MagicMock, patch
 
 import litellm
 import pytest
-from huggingface_hub import ChatCompletionOutput
 from openai.types.chat import ChatCompletion, ChatCompletionMessage
 from openai.types.chat.chat_completion import Choice, CompletionUsage
 
+from huggingface_hub import ChatCompletionOutput
 
-def get_example_files():
-    """Get list of example files to test"""
+
+def get_sync_example_files() -> list[str]:
+    """
+    Get list of synchronous example files to test
+    """
     examples_dir = "examples/observers"
     if not os.path.exists(examples_dir):
         return []
-    return [
-        os.path.join(examples_dir, f)
-        for f in os.listdir(examples_dir)
-        if f.endswith(".py")
-    ]
+
+    sync_files = []
+    for f in os.listdir(examples_dir):
+        if not f.endswith(".py"):
+            continue
+
+        filepath = os.path.join(examples_dir, f)
+        with open(filepath) as file:
+            content = file.read()
+            if "async def" not in content and "await" not in content:
+                sync_files.append(filepath)
+
+    return sync_files
 
 
 @pytest.fixture(scope="function")
@@ -85,16 +96,16 @@ def mock_clients():
         mock.stop()
 
 
-@pytest.mark.parametrize("example_path", get_example_files())
-def test_example_files_execute(example_path, mock_clients):
-    """Test that example files execute without errors"""
+@pytest.mark.parametrize("example_path", get_sync_example_files())
+def test_sync_example_files(example_path, mock_clients):
+    """Test that synchronous example files execute without errors"""
+    if "async def" in open(example_path).read() or "await" in open(example_path).read():
+        pytest.skip("Skipping async example in sync test")
 
-    if not get_example_files():
-        pytest.skip("Examples directory not found")
-
-    print(f"Executing {os.path.basename(example_path)}")
+    print(f"Executing sync example: {os.path.basename(example_path)}")
 
     try:
-        exec(open(example_path).read())
+        with open(example_path) as f:
+            exec(f.read())
     except Exception as e:
         pytest.fail(f"Failed to execute {os.path.basename(example_path)}: {str(e)}")

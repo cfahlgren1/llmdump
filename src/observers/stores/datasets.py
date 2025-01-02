@@ -1,3 +1,4 @@
+import asyncio
 import atexit
 import base64
 import hashlib
@@ -233,3 +234,19 @@ class DatasetsStore(Store):
                     f.flush()
                 except Exception:
                     raise
+
+    async def add_async(self, record: "Record"):
+        """Add a new record to the database asynchronously"""
+        await asyncio.to_thread(self.add, record)
+
+    async def close_async(self):
+        """Close the dataset store asynchronously"""
+        if self._scheduler:
+            await asyncio.to_thread(self._scheduler.__exit__, None, None, None)
+            self._scheduler = None
+
+    def close(self):
+        """Close the dataset store synchronously"""
+        if self._scheduler:
+            self._scheduler.__exit__(None, None, None)
+            self._scheduler = None

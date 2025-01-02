@@ -1,4 +1,5 @@
 # stdlib features
+import asyncio
 from dataclasses import dataclass
 from importlib.metadata import PackageNotFoundError, version
 from typing import Optional
@@ -117,3 +118,7 @@ class OpenTelemetryStore(Store):
         """Initialize the dataset (no op)"""
         # We don't usually do this in otel, a dataset is (typically)
         # initialized by writing to it, but, it's part of the Store interface.
+
+    async def add_async(self, record: Record):
+        """Add a new record to the store asynchronously"""
+        await asyncio.to_thread(self.add, record)

@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import uuid
@@ -7,6 +8,7 @@ from typing import TYPE_CHECKING, List, Optional
 import duckdb
 
 from observers.stores.base import Store
+
 
 if TYPE_CHECKING:
     from observers.base import Record
@@ -81,6 +83,10 @@ class DuckDBStore(Store):
                 for k in record.table_columns
             ],
         )
+
+    async def add_async(self, record: "Record"):
+        """Add a new record to the database asynchronously"""
+        await asyncio.to_thread(self.add, record)
 
     def get_unsynced(self, table_name: str) -> List[tuple]:
         """Retrieve unsynced records"""

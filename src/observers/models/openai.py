@@ -1,7 +1,9 @@
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-import openai
+# Tricky import to avoid lazy loading of openai, useful for testing.
+# TODO: find a better way to do this.
+from openai._client import AsyncOpenAI, OpenAI
 from typing_extensions import Self
 
 from observers.models.base import (
@@ -45,12 +47,12 @@ class OpenAIRecord(ChatCompletionRecord):
 
 
 def wrap_openai(
-    client: openai.OpenAI | openai.AsyncOpenAI,
+    client: Union[OpenAI, AsyncOpenAI],
     store: Optional[Union["DuckDBStore", DatasetsStore]] = None,
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
-) -> ChatCompletionObserver:
-    if isinstance(client, openai.AsyncOpenAI):
+) -> Union[ChatCompletionObserver, AsyncChatCompletionObserver]:
+    if isinstance(client, AsyncOpenAI):
         return AsyncChatCompletionObserver(
             client=client,
             create=client.chat.completions.create,
