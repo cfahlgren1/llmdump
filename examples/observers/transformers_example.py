@@ -5,11 +5,11 @@ from transformers import pipeline
 
 
 model_id = "meta-llama/Llama-3.2-1B-Instruct"
-
+token = os.environ["HF_TOKEN"]
 pipe = pipeline(
     "text-generation",
     model=model_id,
-    token=os.environ["HF_TOKEN"],
+    token=token,
 )
 client = observers.wrap_transformers(pipe)
 messages = [
