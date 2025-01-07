@@ -52,6 +52,19 @@ def wrap_openai(
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
 ) -> Union[ChatCompletionObserver, AsyncChatCompletionObserver]:
+    """
+    Wraps an OpenAI client in an observer.
+
+    Args:
+        client (`Union[OpenAI, AsyncOpenAI]`):
+            The OpenAI client to wrap.
+        store (`Union[DuckDBStore, DatasetsStore]`, *optional*):
+            The store to use to save the records.
+        tags (`List[str]`, *optional*):
+            The tags to associate with records.
+        properties (`Dict[str, Any]`, *optional*):
+            The properties to associate with records.
+    """
     if isinstance(client, AsyncOpenAI):
         return AsyncChatCompletionObserver(
             client=client,

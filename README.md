@@ -59,8 +59,11 @@ response = client.chat.completions.create(
 ## Observers
 
 ### Supported Observers
+We support both sync and async versions of the following observers:
 
 - [OpenAI](https://openai.com/) and every other LLM provider that implements the [OpenAI API message formate](https://platform.openai.com/docs/api-reference)
+- [Hugging Face transformers](https://huggingface.co/docs/transformers/index), the transformers library by Hugging Face offers a simple API with its [TextGenerationPipeline](https://huggingface.co/docs/transformers/en/main_classes/pipelines#transformers.TextGenerationPipeline) for running LLM inference.
+- [Hugging Face Inference Client](https://huggingface.co/docs/huggingface_hub/guides/inference), which is the official client for Hugging Face's [Serverless Inference API](https://huggingface.co/docs/api-inference/en/index), a fast API with a free tier for running LLM inference with models from the Hugging Face Hub.
 - [AISuite](https://github.com/andrewyng/aisuite), which is an LLM router by Andrew Ng and which maps to [a lot of LLM API providers](https://github.com/andrewyng/aisuite/tree/main/aisuite/providers) with a uniform interface.
 - [Litellm](https://docs.litellm.ai/docs/), which is a library that allows you to use [a lot of different LLM APIs](https://docs.litellm.ai/docs/providers) with a uniform interface.
 - [Docling](https://github.com/docling/docling), Docling parses documents and exports them to the desired format with ease and speed. This observer allows you to wrap this and push popular document formats (PDF, DOCX, PPTX, XLSX, Images, HTML, AsciiDoc & Markdown) to the different stores.

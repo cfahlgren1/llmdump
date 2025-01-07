@@ -173,18 +173,22 @@ class ChatCompletionRecord(Record):
 
 class ChatCompletionObserver:
     """
-    Observer that provides a clean interface for tracking chat completions
+    Observer that provides an interface for tracking chat completions.
     Args:
-        client (Any):
+        client (`Any`):
             The client to use for the chat completions.
-        create (Callable[..., Any]):
+        create (`Callable[..., Any]`):
             The function to use to create the chat completions., eg `chat.completions.create` for OpenAI client.
-        format_input (Callable[[Dict[str, Any], Any], Any]):
+        format_input (`Callable[[Dict[str, Any], Any], Any]`):
             The function to use to format the input messages.
-        parse_response (Callable[[Any], Dict[str, Any]]):
+        parse_response (`Callable[[Any], Dict[str, Any]]`):
             The function to use to parse the response.
-        store (Optional[Union["DuckDBStore", DatasetsStore]]):
+        store (`Union["DuckDBStore", DatasetsStore]`, *optional*):
             The store to use to save the records.
+        tags (`List[str]`, *optional*):
+            The tags to associate with records.
+        properties (`Dict[str, Any]`, *optional*):
+            The properties to associate with records.
     """
 
     def __init__(
@@ -220,7 +224,15 @@ class ChatCompletionObserver:
         messages: Dict[str, Any],
         **kwargs: Any,
     ) -> Any:
-        """Create a completion with optional custom formatters"""
+        """Creates a completion.
+
+        Args:
+            messages (`Dict[str, Any]`):
+                The messages to send to the assistant.
+        Returns:
+            Any:
+                The response from the assistant.
+        """
 
         response = None
         try:
@@ -270,18 +282,22 @@ class ChatCompletionObserver:
 
 class AsyncChatCompletionObserver(ChatCompletionObserver):
     """
-    Async observer that provides a clean interface for tracking chat completions
+    Async observer that provides an interface for tracking chat completions
     Args:
-        client (Any):
+        client (`Any`):
             The async client to use for the chat completions.
-        create (Callable[..., Awaitable[Any]]):
+        create (`Callable[..., Awaitable[Any]]`):
             The async function to use to create the chat completions.
-        format_input (Callable[[Dict[str, Any], Any], Any]):
+        format_input (`Callable[[Dict[str, Any], Any], Any]`):
             The function to use to format the input messages.
-        parse_response (Callable[[Any], Dict[str, Any]]):
+        parse_response (`Callable[[Any], Dict[str, Any]]`):
             The function to use to parse the response.
-        store (Optional[Union["DuckDBStore", DatasetsStore]]):
+        store (`Union["DuckDBStore", DatasetsStore]`, *optional*):
             The store to use to save the records.
+        tags (`List[str]`, *optional*):
+            The tags to include in the records.
+        properties (`Dict[str, Any]`, *optional*):
+            The properties to include in the records.
     """
 
     def __init__(
@@ -311,7 +327,15 @@ class AsyncChatCompletionObserver(ChatCompletionObserver):
         messages: Dict[str, Any],
         **kwargs: Any,
     ) -> Any:
-        """Create an async completion with optional custom formatters"""
+        """Create an async completion.
+
+        Args:
+            messages (`Dict[str, Any]`):
+                The messages to send to the assistant.
+        Returns:
+            Any:
+                The response from the assistant.
+        """
         response = None
         try:
             kwargs = self.handle_kwargs(kwargs)

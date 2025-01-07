@@ -115,7 +115,13 @@ class ArgillaStore(Store):
         self._dataset.records.log([record_dict])
 
     async def add_async(self, record: "Record"):
-        """Add a new record to the database asynchronously"""
+        """
+        Add a new record to the database asynchronously
+
+        Args:
+            record (`Record`):
+                The record to add to the database.
+        """
         if not self._dataset:
             self._init_table(record)
 

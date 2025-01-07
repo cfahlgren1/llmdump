@@ -1,15 +1,19 @@
 import uuid
 from typing import Any, Dict, List, Optional, Union
 
-import transformers
 from typing_extensions import Self
 
+import transformers
 from observers.models.base import ChatCompletionObserver, ChatCompletionRecord
 from observers.stores.datasets import DatasetsStore
 from observers.stores.duckdb import DuckDBStore
 
 
 class TransformersRecord(ChatCompletionRecord):
+    """
+    Data class for storing transformer records.
+    """
+
     client_name: str = "transformers"
 
     @classmethod
@@ -37,6 +41,23 @@ def wrap_transformers(
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
 ) -> ChatCompletionObserver:
+    """
+    Wraps a transformers client in an observer.
+
+    Args:
+        client (`transformers.TextGenerationPipeline`):
+            The transformers pipeline to wrap.
+        store (`Union[DuckDBStore, DatasetsStore]`, *optional*):
+            The store to use to save the records.
+        tags (`List[str]`, *optional*):
+            The tags to associate with records.
+        properties (`Dict[str, Any]`, *optional*):
+            The properties to associate with records.
+
+    Returns:
+        `ChatCompletionObserver`:
+            The observer that wraps the transformers pipeline.
+    """
     return ChatCompletionObserver(
         client=client,
         create=client.__call__,
