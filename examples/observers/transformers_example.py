@@ -4,11 +4,10 @@ import observers
 from transformers import pipeline
 
 
-model_id = "meta-llama/Llama-3.2-1B-Instruct"
 token = os.getenv("HF_TOKEN")
 pipe = pipeline(
     "text-generation",
-    model=model_id,
+    model="Qwen/Qwen2.5-0.5B-Instruct",
     token=token,
 )
 client = observers.wrap_transformers(pipe)
