@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import litellm
 
@@ -16,7 +16,7 @@ def wrap_litellm(
     store: Optional[Union["DatasetsStore", "DuckDBStore", "ArgillaStore"]] = None,
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
-) -> Callable:
+) -> Union[AsyncChatCompletionObserver, ChatCompletionObserver]:
     """
     Wrap Litellm completion function to track API calls in a Store.
 

@@ -49,7 +49,7 @@ def wrap_hf_client(
     store: Optional[Union["DuckDBStore", DatasetsStore]] = None,
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
-) -> ChatCompletionObserver:
+) -> Union[AsyncChatCompletionObserver, ChatCompletionObserver]:
     """
     Wraps Hugging Face's Inference Client in an observer.
 
