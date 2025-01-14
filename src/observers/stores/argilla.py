@@ -133,7 +133,7 @@ class ArgillaStore(Store):
 
         record_dict = {k: v for k, v in record_dict.items() if k in self._dataset_keys}
         # Use argilla's native async API
-        await self._dataset.records.alog(
+        await self._dataset.records.log(
             [record_dict],
             background=True,
             verbose=False,

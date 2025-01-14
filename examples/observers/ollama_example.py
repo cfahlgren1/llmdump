@@ -14,5 +14,4 @@ response = client.chat.completions.create(
         {"role": "user", "content": "Tell me a joke."},
     ],
 )
-
 print(response)
