@@ -59,6 +59,7 @@ response = client.chat.completions.create(
 ## Observers
 
 ### Supported Observers
+
 We support both sync and async versions of the following observers:
 
 - [OpenAI](https://openai.com/) and every other LLM provider that implements the [OpenAI API message formate](https://platform.openai.com/docs/api-reference)
