@@ -30,8 +30,6 @@ class HFRecord(ChatCompletionRecord):
         response: Union[
             None,
             List[ChatCompletionStreamOutput],
-            ChatCompletionStreamOutput,
-            List[ChatCompletionOutput],
             ChatCompletionOutput,
         ] = None,
         error=None,
@@ -50,6 +48,7 @@ class HFRecord(ChatCompletionRecord):
         if not response:
             return cls(finish_reason="error", error=str(error), **kwargs)
 
+        # Handle streaming responses
         if isinstance(response, list):
             id = response[0].id if response[0].id else str(uuid.uuid4())
             model = response[0].model if response[0].model else kwargs.get("model")
@@ -83,6 +82,7 @@ class HFRecord(ChatCompletionRecord):
                 **kwargs,
             )
 
+        # Handle non-streaming responses
         else:
             choices = response.get("choices", [{}])[0].get("message", {})
             usage = response.get("usage", {})
