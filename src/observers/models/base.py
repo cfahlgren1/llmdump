@@ -7,7 +7,6 @@ from typing_extensions import Self
 from observers.base import Message, Record
 from observers.stores.datasets import DatasetsStore
 
-
 if TYPE_CHECKING:
     from argilla import Argilla
 
@@ -229,24 +228,56 @@ class ChatCompletionObserver:
         Args:
             messages (`Dict[str, Any]`):
                 The messages to send to the assistant.
+            **kwargs:
+                Additional arguments passed to the create function. If stream=True is passed,
+                the function will return a generator yielding streamed responses.
+
         Returns:
             Any:
-                The response from the assistant.
+                The response from the assistant, or a generator if streaming.
         """
-
         response = None
+        kwargs = self.handle_kwargs(kwargs)
+        input_data = self.format_input(messages, **kwargs)
+
+        # streaming case
+        if kwargs.get("stream", False):
+
+            def stream_responses():
+                response = []
+                try:
+                    for chunk in self.create_fn(**input_data):
+                        yield chunk
+                        response.append(chunk)
+
+                    record = self.parse_response(
+                        response,
+                        tags=self.tags,
+                        properties=self.properties,
+                    )
+                    self.store.add(record)
+
+                except Exception as e:
+                    record = self.parse_response(
+                        response,
+                        error=e,
+                        model=kwargs.get("model"),
+                        tags=self.tags,
+                        properties=self.properties,
+                    )
+                    self.store.add(record)
+                    raise
+
+            return stream_responses()
+
+        # non-streaming case
         try:
-            kwargs = self.handle_kwargs(kwargs)
-
-            input_data = self.format_input(messages, **kwargs)
             response = self.create_fn(**input_data)
-
             record = self.parse_response(
                 response,
                 tags=self.tags,
                 properties=self.properties,
             )
-
             self.store.add(record)
             return response
 
@@ -337,18 +368,47 @@ class AsyncChatCompletionObserver(ChatCompletionObserver):
                 The response from the assistant.
         """
         response = None
+        kwargs = self.handle_kwargs(kwargs)
+        input_data = self.format_input(messages, **kwargs)
+
+        # streaming case
+        if kwargs.get("stream", False):
+
+            async def stream_responses():
+                response = []
+                try:
+                    async for chunk in await self.create_fn(**input_data):
+                        yield chunk
+                        response.append(chunk)
+
+                    record = self.parse_response(
+                        response,
+                        tags=self.tags,
+                        properties=self.properties,
+                    )
+                    await self.store.add_async(record)
+
+                except Exception as e:
+                    record = self.parse_response(
+                        response,
+                        error=e,
+                        model=kwargs.get("model"),
+                        tags=self.tags,
+                        properties=self.properties,
+                    )
+                    await self.store.add_async(record)
+                    raise
+
+            return stream_responses()
+
+        # non-streaming case
         try:
-            kwargs = self.handle_kwargs(kwargs)
-
-            input_data = self.format_input(messages, **kwargs)
             response = await self.create_fn(**input_data)
-
             record = self.parse_response(
                 response,
                 tags=self.tags,
                 properties=self.properties,
             )
-
             await self.store.add_async(record)
             return response
 
@@ -360,7 +420,7 @@ class AsyncChatCompletionObserver(ChatCompletionObserver):
                 tags=self.tags,
                 properties=self.properties,
             )
-            await self.store.add(record)
+            await self.store.add_async(record)
             raise
 
     async def __aenter__(self) -> "AsyncChatCompletionObserver":

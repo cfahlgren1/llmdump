@@ -9,7 +9,6 @@ import duckdb
 
 from observers.stores.base import Store
 
-
 if TYPE_CHECKING:
     from observers.base import Record
 
