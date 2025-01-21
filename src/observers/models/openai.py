@@ -96,6 +96,7 @@ def wrap_openai(
     store: Optional[Union["DuckDBStore", DatasetsStore]] = None,
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
+    logging_rate: Optional[float] = 1,
 ) -> Union[ChatCompletionObserver, AsyncChatCompletionObserver]:
     """
     Wraps an OpenAI client in an observer.
@@ -109,6 +110,8 @@ def wrap_openai(
             The tags to associate with records.
         properties (`Dict[str, Any]`, *optional*):
             The properties to associate with records.
+        logging_rate (`float`, *optional*):
+            The logging rate to use for logging, defaults to 1
     """
     if isinstance(client, AsyncOpenAI):
         return AsyncChatCompletionObserver(
@@ -119,6 +122,7 @@ def wrap_openai(
             store=store,
             tags=tags,
             properties=properties,
+            logging_rate=logging_rate,
         )
 
     return ChatCompletionObserver(
@@ -129,4 +133,5 @@ def wrap_openai(
         store=store,
         tags=tags,
         properties=properties,
+        logging_rate=logging_rate,
     )

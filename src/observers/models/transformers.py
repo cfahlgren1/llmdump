@@ -1,9 +1,9 @@
 import uuid
 from typing import Any, Dict, List, Optional, Union
 
+import transformers
 from typing_extensions import Self
 
-import transformers
 from observers.models.base import ChatCompletionObserver, ChatCompletionRecord
 from observers.stores.datasets import DatasetsStore
 from observers.stores.duckdb import DuckDBStore
@@ -40,6 +40,7 @@ def wrap_transformers(
     store: Optional[Union[DuckDBStore, DatasetsStore]] = None,
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
+    logging_rate: Optional[float] = 1,
 ) -> ChatCompletionObserver:
     """
     Wraps a transformers client in an observer.
@@ -53,6 +54,8 @@ def wrap_transformers(
             The tags to associate with records.
         properties (`Dict[str, Any]`, *optional*):
             The properties to associate with records.
+        logging_rate (`float`, *optional*):
+            The logging rate to use for logging, defaults to 1
 
     Returns:
         `ChatCompletionObserver`:
@@ -66,4 +69,5 @@ def wrap_transformers(
         store=store,
         tags=tags,
         properties=properties,
+        logging_rate=logging_rate,
     )

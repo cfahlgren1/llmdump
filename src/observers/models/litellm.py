@@ -16,6 +16,7 @@ def wrap_litellm(
     store: Optional[Union["DatasetsStore", "DuckDBStore", "ArgillaStore"]] = None,
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
+    logging_rate: Optional[float] = 1,
 ) -> Union[AsyncChatCompletionObserver, ChatCompletionObserver]:
     """
     Wrap Litellm completion function to track API calls in a Store.
@@ -25,6 +26,7 @@ def wrap_litellm(
         store: Store instance for persistence. Creates new if None
         tags: Optional list of tags to associate with records
         properties: Optional dictionary of properties to associate with records
+        logging_rate: Optional logging rate to use for logging, defaults to 1
     """
     if client.__name__ == "acompletion":
         return AsyncChatCompletionObserver(
@@ -35,6 +37,7 @@ def wrap_litellm(
             store=store,
             tags=tags,
             properties=properties,
+            logging_rate=logging_rate,
         )
 
     return ChatCompletionObserver(
@@ -45,4 +48,5 @@ def wrap_litellm(
         store=store,
         tags=tags,
         properties=properties,
+        logging_rate=logging_rate,
     )

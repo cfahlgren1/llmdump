@@ -1,4 +1,5 @@
 import base64
+import random
 from dataclasses import dataclass
 from io import BytesIO
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
@@ -269,6 +270,7 @@ def wrap_docling(
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
     media_types: Optional[List[str]] = None,
+    logging_rate: Optional[float] = 1,
 ) -> "DocumentConverter":
     """
     Wrap DocumentConverter client to track API calls in a Store.
@@ -279,6 +281,7 @@ def wrap_docling(
         tags: Optional list of tags to associate with records
         properties: Optional dictionary of properties to associate with records
         media_type: Optional media type to associate with records "texts", "pictures", "tables" or None for all
+        logging_rate: Optional logging rate to use for logging, defaults to 1
 
     Returns:
         DocumentConverter: Wrapped DocumentConverter client
@@ -308,6 +311,11 @@ def wrap_docling(
 
     def process_document(document, page_no, page) -> None:
         for docling_object, _level in document.iterate_items(page_no=page_no):
+            if random.random() < logging_rate:
+                SHOULD_LOG = True
+            else:
+                SHOULD_LOG = False
+
             if (
                 isinstance(docling_object, (SectionHeaderItem, ListItem, TextItem))
                 and "texts" in media_types
@@ -319,7 +327,8 @@ def wrap_docling(
                     tags=tags,
                     properties=properties,
                 )
-                store.add(record)
+                if SHOULD_LOG:
+                    store.add(record)
             if isinstance(docling_object, PictureItem) and "pictures" in media_types:
                 record = DoclingRecord.create(
                     docling_object=docling_object,
@@ -328,7 +337,8 @@ def wrap_docling(
                     tags=tags,
                     properties=properties,
                 )
-                store.add(record)
+                if SHOULD_LOG:
+                    store.add(record)
             if isinstance(docling_object, TableItem) and "tables" in media_types:
                 record = DoclingRecord.create(
                     docling_object=docling_object,
@@ -337,7 +347,8 @@ def wrap_docling(
                     tags=tags,
                     properties=properties,
                 )
-                store.add(record)
+                if SHOULD_LOG:
+                    store.add(record)
 
     def convert(*args, **kwargs) -> "DoclingDocument":
         result = original_convert(*args, **kwargs)
