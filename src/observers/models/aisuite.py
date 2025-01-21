@@ -16,6 +16,7 @@ def wrap_aisuite(
     store: Optional[Union["DatasetsStore", DuckDBStore, "ArgillaStore"]] = None,
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
+    logging_rate: Optional[float] = 1,
 ) -> "Client":
     """Wraps Aisuite client to track API calls in a Store.
 
@@ -24,6 +25,7 @@ def wrap_aisuite(
         store: Store for persistence (creates new if None)
         tags: Optional tags to associate with records
         properties: Optional properties to associate with records
+        logging_rate: Optional logging rate to use for logging, defaults to 1
     """
     return ChatCompletionObserver(
         client=client,

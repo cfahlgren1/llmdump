@@ -1,4 +1,5 @@
 import datetime
+import random
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
@@ -6,7 +7,6 @@ from typing_extensions import Self
 
 from observers.base import Message, Record
 from observers.stores.datasets import DatasetsStore
-
 
 if TYPE_CHECKING:
     from argilla import Argilla
@@ -189,6 +189,8 @@ class ChatCompletionObserver:
             The tags to associate with records.
         properties (`Dict[str, Any]`, *optional*):
             The properties to associate with records.
+        logging_rate (`float`, *optional*):
+            The logging rate to use for logging, defaults to 1
     """
 
     def __init__(
@@ -200,6 +202,7 @@ class ChatCompletionObserver:
         store: Optional[Union["DuckDBStore", DatasetsStore]] = None,
         tags: Optional[List[str]] = None,
         properties: Optional[Dict[str, Any]] = None,
+        logging_rate: Optional[float] = 1,
         **kwargs: Any,
     ):
         self.client = client
@@ -210,6 +213,7 @@ class ChatCompletionObserver:
         self.tags = tags or []
         self.properties = properties or {}
         self.kwargs = kwargs
+        self.logging_rate = logging_rate
 
     @property
     def chat(self) -> Self:
@@ -246,8 +250,9 @@ class ChatCompletionObserver:
                 tags=self.tags,
                 properties=self.properties,
             )
+            if random.random() < self.logging_rate:
+                self.store.add(record)
 
-            self.store.add(record)
             return response
 
         except Exception as e:
@@ -348,8 +353,8 @@ class AsyncChatCompletionObserver(ChatCompletionObserver):
                 tags=self.tags,
                 properties=self.properties,
             )
-
-            await self.store.add_async(record)
+            if random.random() < self.logging_rate:
+                await self.store.add_async(record)
             return response
 
         except Exception as e:

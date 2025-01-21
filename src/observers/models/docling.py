@@ -269,6 +269,7 @@ def wrap_docling(
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
     media_types: Optional[List[str]] = None,
+    logging_rate: Optional[float] = 1,
 ) -> "DocumentConverter":
     """
     Wrap DocumentConverter client to track API calls in a Store.
@@ -279,6 +280,7 @@ def wrap_docling(
         tags: Optional list of tags to associate with records
         properties: Optional dictionary of properties to associate with records
         media_type: Optional media type to associate with records "texts", "pictures", "tables" or None for all
+        logging_rate: Optional logging rate to use for logging, defaults to 1
 
     Returns:
         DocumentConverter: Wrapped DocumentConverter client
