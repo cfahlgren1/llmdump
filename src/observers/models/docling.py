@@ -1,4 +1,5 @@
 import base64
+import random
 from dataclasses import dataclass
 from io import BytesIO
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
@@ -310,6 +311,11 @@ def wrap_docling(
 
     def process_document(document, page_no, page) -> None:
         for docling_object, _level in document.iterate_items(page_no=page_no):
+            if random.random() < logging_rate:
+                SHOULD_LOG = True
+            else:
+                SHOULD_LOG = False
+
             if (
                 isinstance(docling_object, (SectionHeaderItem, ListItem, TextItem))
                 and "texts" in media_types
@@ -320,9 +326,9 @@ def wrap_docling(
                     page=page,
                     tags=tags,
                     properties=properties,
-                    logging_rate=logging_rate,
                 )
-                store.add(record)
+                if SHOULD_LOG:
+                    store.add(record)
             if isinstance(docling_object, PictureItem) and "pictures" in media_types:
                 record = DoclingRecord.create(
                     docling_object=docling_object,
@@ -330,9 +336,9 @@ def wrap_docling(
                     page=page,
                     tags=tags,
                     properties=properties,
-                    logging_rate=logging_rate,
                 )
-                store.add(record)
+                if SHOULD_LOG:
+                    store.add(record)
             if isinstance(docling_object, TableItem) and "tables" in media_types:
                 record = DoclingRecord.create(
                     docling_object=docling_object,
@@ -340,9 +346,9 @@ def wrap_docling(
                     page=page,
                     tags=tags,
                     properties=properties,
-                    logging_rate=logging_rate,
                 )
-                store.add(record)
+                if SHOULD_LOG:
+                    store.add(record)
 
     def convert(*args, **kwargs) -> "DoclingDocument":
         result = original_convert(*args, **kwargs)
