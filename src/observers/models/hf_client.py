@@ -74,6 +74,7 @@ def wrap_hf_client(
             store=store,
             tags=tags,
             properties=properties,
+            logging_rate=logging_rate,
         )
 
     return ChatCompletionObserver(
@@ -84,4 +85,5 @@ def wrap_hf_client(
         store=store,
         tags=tags,
         properties=properties,
+        logging_rate=logging_rate,
     )

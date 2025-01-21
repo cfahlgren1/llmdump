@@ -35,4 +35,5 @@ def wrap_aisuite(
         store=store,
         tags=tags,
         properties=properties,
+        logging_rate=logging_rate,
     )

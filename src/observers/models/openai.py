@@ -50,6 +50,7 @@ def wrap_openai(
     store: Optional[Union["DuckDBStore", DatasetsStore]] = None,
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
+    logging_rate: Optional[float] = 1,
 ) -> Union[ChatCompletionObserver, AsyncChatCompletionObserver]:
     """
     Wraps an OpenAI client in an observer.

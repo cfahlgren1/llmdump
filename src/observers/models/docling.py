@@ -320,6 +320,7 @@ def wrap_docling(
                     page=page,
                     tags=tags,
                     properties=properties,
+                    logging_rate=logging_rate,
                 )
                 store.add(record)
             if isinstance(docling_object, PictureItem) and "pictures" in media_types:
@@ -329,6 +330,7 @@ def wrap_docling(
                     page=page,
                     tags=tags,
                     properties=properties,
+                    logging_rate=logging_rate,
                 )
                 store.add(record)
             if isinstance(docling_object, TableItem) and "tables" in media_types:
@@ -338,6 +340,7 @@ def wrap_docling(
                     page=page,
                     tags=tags,
                     properties=properties,
+                    logging_rate=logging_rate,
                 )
                 store.add(record)
 
