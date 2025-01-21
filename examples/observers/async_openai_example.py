@@ -14,10 +14,8 @@ async def get_response() -> None:
     response = await client.chat.completions.create(
         model="gpt-4o",
         messages=[{"role": "user", "content": "Tell me a joke."}],
-        stream=True,
     )
-    async for chunk in response:
-        print(chunk)
+    print(response)
 
 
 if __name__ == "__main__":

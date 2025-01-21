@@ -6,6 +6,7 @@ import observers
 
 api_key = os.getenv("HF_TOKEN")
 
+
 # Patch the HF client
 hf_client = InferenceClient(token=api_key)
 client = observers.wrap_hf_client(hf_client)

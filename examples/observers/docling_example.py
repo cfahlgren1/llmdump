@@ -4,7 +4,6 @@ from docling.document_converter import DocumentConverter, PdfFormatOption
 
 from observers import wrap_docling
 
-
 # Configure PDF pipeline options
 pipeline_options = PdfPipelineOptions(
     images_scale=2.0,
