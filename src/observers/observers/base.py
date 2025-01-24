@@ -2,7 +2,6 @@ import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional
-from typing_extensions import Literal
 
 if TYPE_CHECKING:
     from argilla import Argilla
