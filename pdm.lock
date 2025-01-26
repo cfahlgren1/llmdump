@@ -5,7 +5,7 @@
 groups = ["default", "aisuite", "dev", "docling", "litellm", "opentelemetry", "transformers"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:f73fb6b51dc7db1b7f5e16743fc8d3f38e678de3a3f83100cc74e8fb698fcdee"
+content_hash = "sha256:ce87b0af266fe0cc7255e6d20b08d98f41574bee4543568da38e77af4d703d70"
 
 [[metadata.targets]]
 requires_python = ">=3.10,<3.13"
