@@ -1,4 +1,5 @@
 import glob
+import asyncio
 import json
 import os
 import re
@@ -10,8 +11,9 @@ import duckdb
 
 from observers.stores.sql_base import SQLStore
 
+
 if TYPE_CHECKING:
-    from observers.observers.base import Record
+    from observers.base import Record
 
 DEFAULT_DB_NAME = "store.db"
 
@@ -77,6 +79,23 @@ class DuckDBStore(SQLStore):
                 record_dict[k] if k in record_dict else None
                 for k in record.table_columns
             ],
+        )
+
+    async def add_async(self, record: "Record"):
+        """Add a new record to the database asynchronously"""
+        await asyncio.to_thread(self.add, record)
+
+    def get_unsynced(self, table_name: str) -> List[tuple]:
+        """Retrieve unsynced records"""
+        return self._conn.execute(
+            f"SELECT * FROM {table_name} WHERE synced_at IS NULL"
+        ).fetchall()
+
+    def mark_as_synced(self, record_ids: List[str], table_name: str) -> None:
+        """Mark specified records as synced"""
+        self._conn.execute(
+            f"UPDATE {table_name} SET synced_at = CURRENT_TIMESTAMP WHERE id = ANY($1)",
+            [record_ids],
         )
 
     def close(self) -> None:
