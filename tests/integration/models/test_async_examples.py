@@ -27,7 +27,7 @@ def get_async_example_files() -> list[str]:
         filepath = os.path.join(examples_dir, f)
         with open(filepath) as file:
             content = file.read()
-            if "async def" in content or "await" in content:
+            if "async" in content and "stream" not in content:
                 async_files.append(filepath)
 
     return async_files

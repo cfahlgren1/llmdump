@@ -17,15 +17,24 @@ def wrap_aisuite(
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
     logging_rate: Optional[float] = 1,
-) -> "Client":
+) -> ChatCompletionObserver:
     """Wraps Aisuite client to track API calls in a Store.
 
     Args:
-        client: Aisuite client instance
-        store: Store for persistence (creates new if None)
-        tags: Optional tags to associate with records
-        properties: Optional properties to associate with records
-        logging_rate: Optional logging rate to use for logging, defaults to 1
+        client (`Union[InferenceClient, AsyncInferenceClient]`):
+            The HF Inference Client to wrap.
+        store (`Union[DuckDBStore, DatasetsStore]`, *optional*):
+            The store to use to save the records.
+        tags (`List[str]`, *optional*):
+            The tags to associate with records.
+        properties (`Dict[str, Any]`, *optional*):
+            The properties to associate with records.
+        logging_rate (`float`, *optional*):
+            The logging rate to use for logging, defaults to 1
+
+    Returns:
+        `ChatCompletionObserver`:
+            The observer that wraps the Aisuite client.
     """
     return ChatCompletionObserver(
         client=client,

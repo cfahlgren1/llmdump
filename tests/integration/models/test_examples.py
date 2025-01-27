@@ -4,10 +4,9 @@ from unittest.mock import MagicMock, patch
 
 import litellm
 import pytest
+from huggingface_hub import ChatCompletionOutput
 from openai.types.chat import ChatCompletion, ChatCompletionMessage
 from openai.types.chat.chat_completion import Choice, CompletionUsage
-
-from huggingface_hub import ChatCompletionOutput
 
 
 def get_sync_example_files() -> list[str]:
@@ -26,7 +25,11 @@ def get_sync_example_files() -> list[str]:
         filepath = os.path.join(examples_dir, f)
         with open(filepath) as file:
             content = file.read()
-            if "async def" not in content and "await" not in content:
+            if (
+                "async def" not in content
+                and "await" not in content
+                and "stream=True" not in content
+            ):
                 sync_files.append(filepath)
 
     return sync_files

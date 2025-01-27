@@ -22,25 +22,23 @@ def wrap_litellm(
     Wrap Litellm completion function to track API calls in a Store.
 
     Args:
-        client: Litellm completion function
-        store: Store instance for persistence. Creates new if None
-        tags: Optional list of tags to associate with records
-        properties: Optional dictionary of properties to associate with records
-        logging_rate: Optional logging rate to use for logging, defaults to 1
-    """
-    if client.__name__ == "acompletion":
-        return AsyncChatCompletionObserver(
-            client=client,
-            create=client,
-            format_input=lambda inputs, **kwargs: {"messages": inputs, **kwargs},
-            parse_response=OpenAIRecord.from_response,
-            store=store,
-            tags=tags,
-            properties=properties,
-            logging_rate=logging_rate,
-        )
+        client (`Union[InferenceClient, AsyncInferenceClient]`):
+            The HF Inference Client to wrap.
+        store (`Union[DuckDBStore, DatasetsStore]`, *optional*):
+            The store to use to save the records.
+        tags (`List[str]`, *optional*):
+            The tags to associate with records.
+        properties (`Dict[str, Any]`, *optional*):
+            The properties to associate with records.
+        logging_rate (`float`, *optional*):
+            The logging rate to use for logging, defaults to 1
 
-    return ChatCompletionObserver(
+    Returns:
+        `Union[AsyncChatCompletionObserver, ChatCompletionObserver]`:
+            The observer that wraps the Litellm completion function.
+    """
+    # Common observer arguments
+    observer_args = dict(
         client=client,
         create=client,
         format_input=lambda inputs, **kwargs: {"messages": inputs, **kwargs},
@@ -50,3 +48,9 @@ def wrap_litellm(
         properties=properties,
         logging_rate=logging_rate,
     )
+
+    # Return async or sync observer based on client type
+    if client.__name__ == "acompletion":
+        return AsyncChatCompletionObserver(**observer_args)
+
+    return ChatCompletionObserver(**observer_args)

@@ -33,7 +33,7 @@ class ChatCompletionRecord(Record):
     function_call: Optional[Any] = None
 
     @classmethod
-    def from_response(cls, response=None, error=None, **kwargs):
+    def from_response(cls, response=None, error=None, model=None, **kwargs):
         """Create a response record from an API response or error"""
         pass
 
@@ -223,6 +223,18 @@ class ChatCompletionObserver:
     def completions(self) -> Self:
         return self
 
+    def _log_record(self, response, error=None, model=None):
+        record = self.parse_response(
+            response,
+            error=error,
+            model=model,
+            tags=self.tags,
+            properties=self.properties,
+        )
+        if random.random() < self.logging_rate:
+            self.store.add(record)
+        return record
+
     def create(
         self,
         messages: Dict[str, Any],
@@ -233,37 +245,40 @@ class ChatCompletionObserver:
         Args:
             messages (`Dict[str, Any]`):
                 The messages to send to the assistant.
+            **kwargs:
+                Additional arguments passed to the create function. If stream=True is passed,
+                the function will return a generator yielding streamed responses.
+
         Returns:
             Any:
-                The response from the assistant.
+                The response from the assistant, or a generator if streaming.
         """
-
         response = None
+        kwargs = self.handle_kwargs(kwargs)
+        model = kwargs.get("model")
+        input_data = self.format_input(messages, **kwargs)
+
+        if kwargs.get("stream", False):
+
+            def stream_responses():
+                response = []
+                try:
+                    for chunk in self.create_fn(**input_data):
+                        yield chunk
+                        response.append(chunk)
+                    self._log_record(response, model=model)
+                except Exception as e:
+                    self._log_record(response, error=e, model=model)
+                    raise
+
+            return stream_responses()
+
         try:
-            kwargs = self.handle_kwargs(kwargs)
-
-            input_data = self.format_input(messages, **kwargs)
             response = self.create_fn(**input_data)
-
-            record = self.parse_response(
-                response,
-                tags=self.tags,
-                properties=self.properties,
-            )
-            if random.random() < self.logging_rate:
-                self.store.add(record)
-
+            self._log_record(response, model=model)
             return response
-
         except Exception as e:
-            record = self.parse_response(
-                response,
-                error=e,
-                model=kwargs.get("model"),
-                tags=self.tags,
-                properties=self.properties,
-            )
-            self.store.add(record)
+            self._log_record(response, error=e, model=model)
             raise
 
     def handle_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
@@ -273,15 +288,11 @@ class ChatCompletionObserver:
         This method merges the provided kwargs with the default kwargs stored in the instance.
         It ensures that any kwargs passed to the method call take precedence over the default ones.
         """
-        for key, value in self.kwargs.items():
-            if key not in kwargs:
-                kwargs[key] = value
-        return kwargs
+        return {**self.kwargs, **kwargs}
 
     def __getattr__(self, attr: str) -> Any:
         if attr not in {"create", "chat", "messages"}:
             return getattr(self.client, attr)
-
         return getattr(self, attr)
 
 
@@ -303,29 +314,21 @@ class AsyncChatCompletionObserver(ChatCompletionObserver):
             The tags to include in the records.
         properties (`Dict[str, Any]`, *optional*):
             The properties to include in the records.
+        logging_rate (`float`, *optional*):
+            The logging rate to use for logging, defaults to 1
     """
 
-    def __init__(
-        self,
-        client: Any,
-        create: Callable[..., Any],
-        format_input: Callable[[Dict[str, Any], Any], Any],
-        parse_response: Callable[[Any], Dict[str, Any]],
-        store: Optional[Union["DuckDBStore", DatasetsStore]] = None,
-        tags: Optional[List[str]] = None,
-        properties: Optional[Dict[str, Any]] = None,
-        **kwargs: Any,
-    ):
-        super().__init__(
-            client=client,
-            create=create,
-            format_input=format_input,
-            parse_response=parse_response,
-            store=store,
-            tags=tags,
-            properties=properties,
-            **kwargs,
+    async def _log_record_async(self, response, error=None, model=None):
+        record = self.parse_response(
+            response,
+            error=error,
+            model=model,
+            tags=self.tags,
+            properties=self.properties,
         )
+        if random.random() < self.logging_rate:
+            await self.store.add_async(record)
+        return record
 
     async def create(
         self,
@@ -342,30 +345,31 @@ class AsyncChatCompletionObserver(ChatCompletionObserver):
                 The response from the assistant.
         """
         response = None
+        kwargs = self.handle_kwargs(kwargs)
+        input_data = self.format_input(messages, **kwargs)
+        model = kwargs.get("model")
+
+        if kwargs.get("stream", False):
+
+            async def stream_responses():
+                response = []
+                try:
+                    async for chunk in await self.create_fn(**input_data):
+                        yield chunk
+                        response.append(chunk)
+                    await self._log_record_async(response, model=model)
+                except Exception as e:
+                    await self._log_record_async(response, error=e, model=model)
+                    raise
+
+            return stream_responses()
+
         try:
-            kwargs = self.handle_kwargs(kwargs)
-
-            input_data = self.format_input(messages, **kwargs)
             response = await self.create_fn(**input_data)
-
-            record = self.parse_response(
-                response,
-                tags=self.tags,
-                properties=self.properties,
-            )
-            if random.random() < self.logging_rate:
-                await self.store.add_async(record)
+            await self._log_record_async(response, model=model)
             return response
-
         except Exception as e:
-            record = self.parse_response(
-                response,
-                error=e,
-                model=kwargs.get("model"),
-                tags=self.tags,
-                properties=self.properties,
-            )
-            await self.store.add(record)
+            await self._log_record_async(response, error=e, model=model)
             raise
 
     async def __aenter__(self) -> "AsyncChatCompletionObserver":
