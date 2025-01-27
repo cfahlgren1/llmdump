@@ -45,9 +45,6 @@ litellm = [
 transformers = [
     "transformers>=4.46.0"
 ]
-docling = [
-    "docling>=2.8.0",
-]
 opentelemetry = [
     "opentelemetry-api>=1.28.0",
     "opentelemetry-sdk>=1.28.0",

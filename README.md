@@ -22,12 +22,6 @@ Or if you want to use other LLM providers through AISuite or Litellm, you can in
 pip install observers[aisuite] # or observers[litellm]
 ```
 
-Whenever you want to observer document information, you can use our Docling integration.
-
-```bash
-pip install observers[docling]
-```
-
 For open telemetry, you can install the following:
 
 ```bash
@@ -67,7 +61,6 @@ We support both sync and async versions of the following observers:
 - [Hugging Face Inference Client](https://huggingface.co/docs/huggingface_hub/guides/inference), which is the official client for Hugging Face's [Serverless Inference API](https://huggingface.co/docs/api-inference/en/index), a fast API with a free tier for running LLM inference with models from the Hugging Face Hub.
 - [AISuite](https://github.com/andrewyng/aisuite), which is an LLM router by Andrew Ng and which maps to [a lot of LLM API providers](https://github.com/andrewyng/aisuite/tree/main/aisuite/providers) with a uniform interface.
 - [Litellm](https://docs.litellm.ai/docs/), which is a library that allows you to use [a lot of different LLM APIs](https://docs.litellm.ai/docs/providers) with a uniform interface.
-- [Docling](https://github.com/docling/docling), Docling parses documents and exports them to the desired format with ease and speed. This observer allows you to wrap this and push popular document formats (PDF, DOCX, PPTX, XLSX, Images, HTML, AsciiDoc & Markdown) to the different stores.
 
 ### Change OpenAI compliant LLM provider
 
