@@ -14,6 +14,10 @@ if TYPE_CHECKING:
     from observers.stores.duckdb import DuckDBStore
 
 
+class LitellmRecord(OpenAIRecord):
+    client_name: str = "litellm"
+
+
 def wrap_litellm(
     client: Union["completion", "acompletion"],
     store: Optional[Union["DatasetsStore", "DuckDBStore", "ArgillaStore"]] = None,
@@ -44,7 +48,7 @@ def wrap_litellm(
         "client": client,
         "create": client,
         "format_input": lambda inputs, **kwargs: {"messages": inputs, **kwargs},
-        "parse_response": OpenAIRecord.from_response,
+        "parse_response": LitellmRecord.from_response,
         "store": store,
         "tags": tags,
         "properties": properties,

@@ -14,6 +14,10 @@ if TYPE_CHECKING:
     from observers.stores.duckdb import DuckDBStore
 
 
+class AisuiteRecord(OpenAIRecord):
+    client_name: str = "aisuite"
+
+
 def wrap_aisuite(
     client: "Client",
     store: Optional[Union["DatasetsStore", "DuckDBStore", "ArgillaStore"]] = None,
@@ -43,7 +47,7 @@ def wrap_aisuite(
         client=client,
         create=client.chat.completions.create,
         format_input=lambda inputs, **kwargs: {"messages": inputs, **kwargs},
-        parse_response=OpenAIRecord.from_response,
+        parse_response=AisuiteRecord.from_response,
         store=store,
         tags=tags,
         properties=properties,
