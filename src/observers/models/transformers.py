@@ -1,12 +1,16 @@
 import uuid
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-import transformers
-from typing_extensions import Self
+from observers.models.base import (
+    ChatCompletionObserver,
+    ChatCompletionRecord,
+)
 
-from observers.models.base import ChatCompletionObserver, ChatCompletionRecord
-from observers.stores.datasets import DatasetsStore
-from observers.stores.duckdb import DuckDBStore
+if TYPE_CHECKING:
+    from transformers import TextGenerationPipeline
+
+    from observers.stores.datasets import DatasetsStore
+    from observers.stores.duckdb import DuckDBStore
 
 
 class TransformersRecord(ChatCompletionRecord):
@@ -23,7 +27,7 @@ class TransformersRecord(ChatCompletionRecord):
         error: Exception = None,
         model: Optional[str] = None,
         **kwargs,
-    ) -> Self:
+    ) -> "TransformersRecord":
         if not response:
             return cls(finish_reason="error", error=str(error), **kwargs)
         generated_text = response[0]["generated_text"][-1]
@@ -37,8 +41,8 @@ class TransformersRecord(ChatCompletionRecord):
 
 
 def wrap_transformers(
-    client: transformers.TextGenerationPipeline,
-    store: Optional[Union[DuckDBStore, DatasetsStore]] = None,
+    client: "TextGenerationPipeline",
+    store: Optional[Union["DuckDBStore", "DatasetsStore"]] = None,
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
     logging_rate: Optional[float] = 1,

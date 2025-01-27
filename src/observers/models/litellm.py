@@ -1,18 +1,21 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-import litellm
-
-from observers.models.base import AsyncChatCompletionObserver, ChatCompletionObserver
+from observers.models.base import (
+    AsyncChatCompletionObserver,
+    ChatCompletionObserver,
+)
 from observers.models.openai import OpenAIRecord
 
 if TYPE_CHECKING:
+    from litellm import acompletion, completion
+
     from observers.stores.argilla import ArgillaStore
     from observers.stores.datasets import DatasetsStore
     from observers.stores.duckdb import DuckDBStore
 
 
 def wrap_litellm(
-    client: Union[litellm.completion, litellm.acompletion],
+    client: Union["completion", "acompletion"],
     store: Optional[Union["DatasetsStore", "DuckDBStore", "ArgillaStore"]] = None,
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
@@ -37,19 +40,16 @@ def wrap_litellm(
         `Union[AsyncChatCompletionObserver, ChatCompletionObserver]`:
             The observer that wraps the Litellm completion function.
     """
-    # Common observer arguments
-    observer_args = dict(
-        client=client,
-        create=client,
-        format_input=lambda inputs, **kwargs: {"messages": inputs, **kwargs},
-        parse_response=OpenAIRecord.from_response,
-        store=store,
-        tags=tags,
-        properties=properties,
-        logging_rate=logging_rate,
-    )
-
-    # Return async or sync observer based on client type
+    observer_args = {
+        "client": client,
+        "create": client,
+        "format_input": lambda inputs, **kwargs: {"messages": inputs, **kwargs},
+        "parse_response": OpenAIRecord.from_response,
+        "store": store,
+        "tags": tags,
+        "properties": properties,
+        "logging_rate": logging_rate,
+    }
     if client.__name__ == "acompletion":
         return AsyncChatCompletionObserver(**observer_args)
 

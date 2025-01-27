@@ -1,23 +1,26 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from observers.models.base import ChatCompletionObserver
+from observers.models.base import (
+    AsyncChatCompletionObserver,
+    ChatCompletionObserver,
+)
 from observers.models.openai import OpenAIRecord
-from observers.stores.duckdb import DuckDBStore
 
 if TYPE_CHECKING:
     from aisuite import Client
 
     from observers.stores.argilla import ArgillaStore
     from observers.stores.datasets import DatasetsStore
+    from observers.stores.duckdb import DuckDBStore
 
 
 def wrap_aisuite(
     client: "Client",
-    store: Optional[Union["DatasetsStore", DuckDBStore, "ArgillaStore"]] = None,
+    store: Optional[Union["DatasetsStore", "DuckDBStore", "ArgillaStore"]] = None,
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
     logging_rate: Optional[float] = 1,
-) -> ChatCompletionObserver:
+) -> Union[AsyncChatCompletionObserver, ChatCompletionObserver]:
     """Wraps Aisuite client to track API calls in a Store.
 
     Args:

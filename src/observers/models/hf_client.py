@@ -2,22 +2,21 @@ import uuid
 from dataclasses import asdict
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from huggingface_hub import (
-    AsyncInferenceClient,
-    ChatCompletionOutput,
-    ChatCompletionStreamOutput,
-    InferenceClient,
-)
-from typing_extensions import Self
+from huggingface_hub import AsyncInferenceClient, InferenceClient
 
 from observers.models.base import (
     AsyncChatCompletionObserver,
     ChatCompletionObserver,
     ChatCompletionRecord,
 )
-from observers.stores.datasets import DatasetsStore
 
 if TYPE_CHECKING:
+    from huggingface_hub import (
+        ChatCompletionOutput,
+        ChatCompletionStreamOutput,
+    )
+
+    from observers.stores.datasets import DatasetsStore
     from observers.stores.duckdb import DuckDBStore
 
 
@@ -29,13 +28,12 @@ class HFRecord(ChatCompletionRecord):
         cls,
         response: Union[
             None,
-            List[ChatCompletionStreamOutput],
-            ChatCompletionOutput,
+            List["ChatCompletionStreamOutput"],
+            "ChatCompletionOutput",
         ] = None,
         error=None,
-        model=None,
         **kwargs,
-    ) -> Self:
+    ) -> "HFRecord":
         """Create a response record from an API response or error
 
         Args:
@@ -103,12 +101,12 @@ class HFRecord(ChatCompletionRecord):
 
 
 def wrap_hf_client(
-    client: Union[InferenceClient, AsyncInferenceClient],
-    store: Optional[Union["DuckDBStore", DatasetsStore]] = None,
+    client: Union["InferenceClient", "AsyncInferenceClient"],
+    store: Optional[Union["DuckDBStore", "DatasetsStore"]] = None,
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
     logging_rate: Optional[float] = 1,
-) -> Union[AsyncChatCompletionObserver, ChatCompletionObserver]:
+) -> Union["AsyncChatCompletionObserver", "ChatCompletionObserver"]:
     """
     Wraps Hugging Face's Inference Client in an observer.
 
@@ -128,18 +126,16 @@ def wrap_hf_client(
         `Union[AsyncChatCompletionObserver, ChatCompletionObserver]`:
             The observer that wraps the HF Inference Client.
     """
-    observer_args = dict(
-        client=client,
-        create=client.chat.completions.create,
-        format_input=lambda inputs, **kwargs: {"messages": inputs, **kwargs},
-        parse_response=HFRecord.from_response,
-        store=store,
-        tags=tags,
-        properties=properties,
-        logging_rate=logging_rate,
-    )
-
+    observer_args = {
+        "client": client,
+        "create": client.chat.completions.create,
+        "format_input": lambda inputs, **kwargs: {"messages": inputs, **kwargs},
+        "parse_response": HFRecord.from_response,
+        "store": store,
+        "tags": tags,
+        "properties": properties,
+        "logging_rate": logging_rate,
+    }
     if isinstance(client, AsyncInferenceClient):
         return AsyncChatCompletionObserver(**observer_args)
-
     return ChatCompletionObserver(**observer_args)
