@@ -24,6 +24,7 @@ class OpenAIRecord(ChatCompletionRecord):
         cls,
         response: Union[List[ChatCompletionChunk], ChatCompletion] = None,
         error=None,
+        model=None,
         **kwargs,
     ) -> Self:
         """Create a response record from an API response or error"""
@@ -34,7 +35,6 @@ class OpenAIRecord(ChatCompletionRecord):
         if isinstance(response, list):
             first_dump = response[0].model_dump()
             last_dump = response[-1].model_dump()
-            model = first_dump.get("model")
             content = ""
 
             completion_tokens = prompt_tokens = total_tokens = 0
@@ -56,7 +56,6 @@ class OpenAIRecord(ChatCompletionRecord):
 
             return cls(
                 id=first_dump.get("id") or str(uuid.uuid4()),
-                model=model,
                 completion_tokens=completion_tokens,
                 prompt_tokens=prompt_tokens,
                 total_tokens=total_tokens,
@@ -72,10 +71,8 @@ class OpenAIRecord(ChatCompletionRecord):
         response_dump = response.model_dump()
         choices = response_dump.get("choices", [{}])[0].get("message", {})
         usage = response_dump.get("usage", {}) or {}
-        model = kwargs.pop("model", response_dump.get("model"))
         return cls(
             id=response.id or str(uuid.uuid4()),
-            model=model,
             completion_tokens=usage.get("completion_tokens"),
             prompt_tokens=usage.get("prompt_tokens"),
             total_tokens=usage.get("total_tokens"),

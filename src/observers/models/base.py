@@ -33,7 +33,7 @@ class ChatCompletionRecord(Record):
     function_call: Optional[Any] = None
 
     @classmethod
-    def from_response(cls, response=None, error=None, **kwargs):
+    def from_response(cls, response=None, error=None, model=None, **kwargs):
         """Create a response record from an API response or error"""
         pass
 

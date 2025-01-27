@@ -33,6 +33,7 @@ class HFRecord(ChatCompletionRecord):
             ChatCompletionOutput,
         ] = None,
         error=None,
+        model=None,
         **kwargs,
     ) -> Self:
         """Create a response record from an API response or error
@@ -50,7 +51,6 @@ class HFRecord(ChatCompletionRecord):
             first_dump = asdict(response[0])
             last_dump = asdict(response[-1])
             id = first_dump.get("id") or str(uuid.uuid4())
-            model = first_dump.get("model") or kwargs.get("model")
 
             choices = last_dump.get("choices", [{}])[0]
             delta = choices.get("delta", {})
@@ -72,7 +72,6 @@ class HFRecord(ChatCompletionRecord):
 
             return cls(
                 id=id,
-                model=model,
                 completion_tokens=completion_tokens,
                 prompt_tokens=prompt_tokens,
                 total_tokens=total_tokens,
@@ -91,7 +90,6 @@ class HFRecord(ChatCompletionRecord):
 
         return cls(
             id=response_dump.get("id") or str(uuid.uuid4()),
-            model=response_dump.get("model"),
             completion_tokens=usage.get("completion_tokens"),
             prompt_tokens=usage.get("prompt_tokens"),
             total_tokens=usage.get("total_tokens"),

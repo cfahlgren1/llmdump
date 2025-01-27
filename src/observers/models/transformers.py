@@ -21,6 +21,7 @@ class TransformersRecord(ChatCompletionRecord):
         cls,
         response: Dict[str, Any] = None,
         error: Exception = None,
+        model: Optional[str] = None,
         **kwargs,
     ) -> Self:
         if not response:
