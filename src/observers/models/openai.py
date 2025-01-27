@@ -1,8 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from openai._client import AsyncOpenAI, OpenAI
-from openai.types.chat import ChatCompletion, ChatCompletionChunk
+from openai import AsyncOpenAI, OpenAI
 from typing_extensions import Self
 
 from observers.models.base import (
@@ -10,9 +9,11 @@ from observers.models.base import (
     ChatCompletionObserver,
     ChatCompletionRecord,
 )
-from observers.stores.datasets import DatasetsStore
 
 if TYPE_CHECKING:
+    from openai.types.chat import ChatCompletion, ChatCompletionChunk
+
+    from observers.stores.datasets import DatasetsStore
     from observers.stores.duckdb import DuckDBStore
 
 
@@ -22,9 +23,8 @@ class OpenAIRecord(ChatCompletionRecord):
     @classmethod
     def from_response(
         cls,
-        response: Union[List[ChatCompletionChunk], ChatCompletion] = None,
+        response: Union[List["ChatCompletionChunk"], "ChatCompletion"] = None,
         error=None,
-        model=None,
         **kwargs,
     ) -> Self:
         """Create a response record from an API response or error"""
@@ -86,8 +86,8 @@ class OpenAIRecord(ChatCompletionRecord):
 
 
 def wrap_openai(
-    client: Union[OpenAI, AsyncOpenAI],
-    store: Optional[Union["DuckDBStore", DatasetsStore]] = None,
+    client: Union["OpenAI", "AsyncOpenAI"],
+    store: Optional[Union["DuckDBStore", "DatasetsStore"]] = None,
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
     logging_rate: Optional[float] = 1,
@@ -111,18 +111,16 @@ def wrap_openai(
         `Union[ChatCompletionObserver, AsyncChatCompletionObserver]`:
             The observer that wraps the OpenAI client.
     """
-    observer_args = dict(
-        client=client,
-        create=client.chat.completions.create,
-        format_input=lambda inputs, **kwargs: {"messages": inputs, **kwargs},
-        parse_response=OpenAIRecord.from_response,
-        store=store,
-        tags=tags,
-        properties=properties,
-        logging_rate=logging_rate,
-    )
-
+    observer_args = {
+        "client": client,
+        "create": client.chat.completions.create,
+        "format_input": lambda inputs, **kwargs: {"messages": inputs, **kwargs},
+        "parse_response": OpenAIRecord.from_response,
+        "store": store,
+        "tags": tags,
+        "properties": properties,
+        "logging_rate": logging_rate,
+    }
     if isinstance(client, AsyncOpenAI):
         return AsyncChatCompletionObserver(**observer_args)
-
     return ChatCompletionObserver(**observer_args)
