@@ -15,7 +15,7 @@ def get_async_example_files() -> list[str]:
     Returns:
         list[str]: List of paths to asynchronous example files
     """
-    examples_dir = "examples/observers"
+    examples_dir = "examples/models"
     if not os.path.exists(examples_dir):
         return []
 
