@@ -28,19 +28,8 @@ def wrap_litellm(
         properties: Optional dictionary of properties to associate with records
         logging_rate: Optional logging rate to use for logging, defaults to 1
     """
-    if client.__name__ == "acompletion":
-        return AsyncChatCompletionObserver(
-            client=client,
-            create=client,
-            format_input=lambda inputs, **kwargs: {"messages": inputs, **kwargs},
-            parse_response=OpenAIRecord.from_response,
-            store=store,
-            tags=tags,
-            properties=properties,
-            logging_rate=logging_rate,
-        )
-
-    return ChatCompletionObserver(
+    # Common observer arguments
+    observer_args = dict(
         client=client,
         create=client,
         format_input=lambda inputs, **kwargs: {"messages": inputs, **kwargs},
@@ -50,3 +39,9 @@ def wrap_litellm(
         properties=properties,
         logging_rate=logging_rate,
     )
+
+    # Return async or sync observer based on client type
+    if client.__name__ == "acompletion":
+        return AsyncChatCompletionObserver(**observer_args)
+
+    return ChatCompletionObserver(**observer_args)

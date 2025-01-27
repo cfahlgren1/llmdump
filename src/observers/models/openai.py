@@ -1,14 +1,8 @@
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-# Tricky import to avoid lazy loading of openai, useful for testing.
-# TODO: find a better way to do this.
-from openai._client import (
-    AsyncOpenAI,
-    OpenAI,
-    OpenAIWithRawResponse,
-    OpenAIWithStreamedResponse,
-)
+from openai._client import AsyncOpenAI, OpenAI
+from openai.types.chat import ChatCompletion, ChatCompletionChunk
 from typing_extensions import Self
 
 from observers.models.base import (
@@ -28,7 +22,7 @@ class OpenAIRecord(ChatCompletionRecord):
     @classmethod
     def from_response(
         cls,
-        response: Union[List[OpenAIWithStreamedResponse], OpenAIWithRawResponse] = None,
+        response: Union[List[ChatCompletionChunk], ChatCompletion] = None,
         error=None,
         **kwargs,
     ) -> Self:
@@ -38,57 +32,60 @@ class OpenAIRecord(ChatCompletionRecord):
 
         # Handle streaming responses
         if isinstance(response, list):
-            model = response[0].model
+            first_dump = response[0].model_dump()
+            last_dump = response[-1].model_dump()
+            model = first_dump.get("model")
             content = ""
 
-            completion_tokens = 0
-            prompt_tokens = 0
-            total_tokens = 0
+            completion_tokens = prompt_tokens = total_tokens = 0
 
-            finish_reason = response[-1].choices[0].finish_reason
-            tool_calls = response[-1].choices[0].delta.tool_calls
-            function_call = response[-1].choices[0].delta.function_call
+            choices = last_dump.get("choices", [{}])[0]
+            delta = choices.get("delta", {})
 
-            for r in response:
-                content += r.choices[0].delta.content or ""
-                usage = r.usage or {}
+            raw_response = {}
+            for i, r in enumerate(response):
+                r_dump = r.model_dump()
+                raw_response[i] = r_dump
+                content += (
+                    r_dump.get("choices", [{}])[0].get("delta", {}).get("content") or ""
+                )
+                usage = r_dump.get("usage", {}) or {}
                 completion_tokens += usage.get("completion_tokens", 0)
                 prompt_tokens += usage.get("prompt_tokens", 0)
                 total_tokens += usage.get("total_tokens", 0)
 
             return cls(
-                id=response[0].id if response[0].id else str(uuid.uuid4()),
+                id=first_dump.get("id") or str(uuid.uuid4()),
                 model=model,
                 completion_tokens=completion_tokens,
                 prompt_tokens=prompt_tokens,
                 total_tokens=total_tokens,
                 assistant_message=content,
-                finish_reason=finish_reason,
-                tool_calls=tool_calls,
-                function_call=function_call,
-                raw_response={i: r.model_dump() for i, r in enumerate(response)},
+                finish_reason=choices.get("finish_reason"),
+                tool_calls=delta.get("tool_calls"),
+                function_call=delta.get("function_call"),
+                raw_response=raw_response,
                 **kwargs,
             )
 
         # Handle non-streaming responses
-        else:
-            dump = response.model_dump()
-            choices = dump.get("choices", [{}])[0].get("message", {})
-            usage = dump.get("usage", {})
-            model = kwargs.pop("model", dump.get("model"))
-            return cls(
-                id=response.id if response.id else str(uuid.uuid4()),
-                model=model,
-                completion_tokens=usage.get("completion_tokens"),
-                prompt_tokens=usage.get("prompt_tokens"),
-                total_tokens=usage.get("total_tokens"),
-                assistant_message=choices.get("content"),
-                finish_reason=dump.get("choices", [{}])[0].get("finish_reason"),
-                tool_calls=choices.get("tool_calls"),
-                function_call=choices.get("function_call"),
-                raw_response=dump,
-                **kwargs,
-            )
+        response_dump = response.model_dump()
+        choices = response_dump.get("choices", [{}])[0].get("message", {})
+        usage = response_dump.get("usage", {}) or {}
+        model = kwargs.pop("model", response_dump.get("model"))
+        return cls(
+            id=response.id or str(uuid.uuid4()),
+            model=model,
+            completion_tokens=usage.get("completion_tokens"),
+            prompt_tokens=usage.get("prompt_tokens"),
+            total_tokens=usage.get("total_tokens"),
+            assistant_message=choices.get("content"),
+            finish_reason=response_dump.get("choices", [{}])[0].get("finish_reason"),
+            tool_calls=choices.get("tool_calls"),
+            function_call=choices.get("function_call"),
+            raw_response=response_dump,
+            **kwargs,
+        )
 
 
 def wrap_openai(
@@ -102,30 +99,13 @@ def wrap_openai(
     Wraps an OpenAI client in an observer.
 
     Args:
-        client (`Union[OpenAI, AsyncOpenAI]`):
-            The OpenAI client to wrap.
-        store (`Union[DuckDBStore, DatasetsStore]`, *optional*):
-            The store to use to save the records.
-        tags (`List[str]`, *optional*):
-            The tags to associate with records.
-        properties (`Dict[str, Any]`, *optional*):
-            The properties to associate with records.
-        logging_rate (`float`, *optional*):
-            The logging rate to use for logging, defaults to 1
+        client: The OpenAI client to wrap.
+        store: The store to use to save the records.
+        tags: The tags to associate with records.
+        properties: The properties to associate with records.
+        logging_rate: The logging rate to use for logging, defaults to 1
     """
-    if isinstance(client, AsyncOpenAI):
-        return AsyncChatCompletionObserver(
-            client=client,
-            create=client.chat.completions.create,
-            format_input=lambda inputs, **kwargs: {"messages": inputs, **kwargs},
-            parse_response=OpenAIRecord.from_response,
-            store=store,
-            tags=tags,
-            properties=properties,
-            logging_rate=logging_rate,
-        )
-
-    return ChatCompletionObserver(
+    observer_args = dict(
         client=client,
         create=client.chat.completions.create,
         format_input=lambda inputs, **kwargs: {"messages": inputs, **kwargs},
@@ -135,3 +115,8 @@ def wrap_openai(
         properties=properties,
         logging_rate=logging_rate,
     )
+
+    if isinstance(client, AsyncOpenAI):
+        return AsyncChatCompletionObserver(**observer_args)
+
+    return ChatCompletionObserver(**observer_args)
