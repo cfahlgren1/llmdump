@@ -22,11 +22,20 @@ def wrap_litellm(
     Wrap Litellm completion function to track API calls in a Store.
 
     Args:
-        client: Litellm completion function
-        store: Store instance for persistence. Creates new if None
-        tags: Optional list of tags to associate with records
-        properties: Optional dictionary of properties to associate with records
-        logging_rate: Optional logging rate to use for logging, defaults to 1
+        client (`Union[InferenceClient, AsyncInferenceClient]`):
+            The HF Inference Client to wrap.
+        store (`Union[DuckDBStore, DatasetsStore]`, *optional*):
+            The store to use to save the records.
+        tags (`List[str]`, *optional*):
+            The tags to associate with records.
+        properties (`Dict[str, Any]`, *optional*):
+            The properties to associate with records.
+        logging_rate (`float`, *optional*):
+            The logging rate to use for logging, defaults to 1
+
+    Returns:
+        `Union[AsyncChatCompletionObserver, ChatCompletionObserver]`:
+            The observer that wraps the Litellm completion function.
     """
     # Common observer arguments
     observer_args = dict(

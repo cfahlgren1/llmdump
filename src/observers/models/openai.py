@@ -96,11 +96,20 @@ def wrap_openai(
     Wraps an OpenAI client in an observer.
 
     Args:
-        client: The OpenAI client to wrap.
-        store: The store to use to save the records.
-        tags: The tags to associate with records.
-        properties: The properties to associate with records.
-        logging_rate: The logging rate to use for logging, defaults to 1
+        client (`Union[OpenAI, AsyncOpenAI]`):
+            The OpenAI client to wrap.
+        store (`Union[DuckDBStore, DatasetsStore]`, *optional*):
+            The store to use to save the records.
+        tags (`List[str]`, *optional*):
+            The tags to associate with records.
+        properties (`Dict[str, Any]`, *optional*):
+            The properties to associate with records.
+        logging_rate (`float`, *optional*):
+            The logging rate to use for logging, defaults to 1
+
+    Returns:
+        `Union[ChatCompletionObserver, AsyncChatCompletionObserver]`:
+            The observer that wraps the OpenAI client.
     """
     observer_args = dict(
         client=client,
