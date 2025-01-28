@@ -13,7 +13,7 @@ def get_sync_example_files() -> list[str]:
     """
     Get list of synchronous example files to test
     """
-    examples_dir = "examples/observers"
+    examples_dir = "examples/models"
     if not os.path.exists(examples_dir):
         return []
 
