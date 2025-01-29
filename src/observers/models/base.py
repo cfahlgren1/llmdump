@@ -231,13 +231,17 @@ class ChatCompletionObserver:
     def completions(self) -> Self:
         return self
 
-    def _log_record(self, response, error=None, model=None):
+    def _log_record(
+        self, response, error=None, model=None, messages=None, arguments=None
+    ):
         record = self.parse_response(
             response,
             error=error,
             model=model,
+            messages=messages,
             tags=self.tags,
             properties=self.properties,
+            arguments=arguments,
         )
         if random.random() < self.logging_rate:
             self.store.add(record)
@@ -263,30 +267,47 @@ class ChatCompletionObserver:
         """
         response = None
         kwargs = self.handle_kwargs(kwargs)
+        excluded_args = {"model", "messages", "tags", "properties"}
+        arguments = {k: v for k, v in kwargs.items() if k not in excluded_args}
         model = kwargs.get("model")
         input_data = self.format_input(messages, **kwargs)
 
         if kwargs.get("stream", False):
 
             def stream_responses():
-                response = []
+                response_buffer = []
                 try:
                     for chunk in self.create_fn(**input_data):
                         yield chunk
-                        response.append(chunk)
-                    self._log_record(response, model=model)
+                        response_buffer.append(chunk)
+                    self._log_record(
+                        response_buffer,
+                        model=model,
+                        messages=messages,
+                        arguments=arguments,
+                    )
                 except Exception as e:
-                    self._log_record(response, error=e, model=model)
+                    self._log_record(
+                        response_buffer,
+                        error=e,
+                        model=model,
+                        messages=messages,
+                        arguments=arguments,
+                    )
                     raise
 
             return stream_responses()
 
         try:
             response = self.create_fn(**input_data)
-            self._log_record(response, model=model)
+            self._log_record(
+                response, model=model, messages=messages, arguments=arguments
+            )
             return response
         except Exception as e:
-            self._log_record(response, error=e, model=model)
+            self._log_record(
+                response, error=e, model=model, messages=messages, arguments=arguments
+            )
             raise
 
     def handle_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
@@ -326,11 +347,14 @@ class AsyncChatCompletionObserver(ChatCompletionObserver):
             The logging rate to use for logging, defaults to 1
     """
 
-    async def _log_record_async(self, response, error=None, model=None, arguments=None):
+    async def _log_record_async(
+        self, response, error=None, model=None, messages=None, arguments=None
+    ):
         record = self.parse_response(
             response,
             error=error,
             model=model,
+            messages=messages,
             tags=self.tags,
             properties=self.properties,
             arguments=arguments,
@@ -363,17 +387,24 @@ class AsyncChatCompletionObserver(ChatCompletionObserver):
         if kwargs.get("stream", False):
 
             async def stream_responses():
-                response = []
+                response_buffer = []
                 try:
                     async for chunk in await self.create_fn(**input_data):
                         yield chunk
-                        response.append(chunk)
+                        response_buffer.append(chunk)
                     await self._log_record_async(
-                        response, model=model, arguments=arguments
+                        response_buffer,
+                        model=model,
+                        messages=messages,
+                        arguments=arguments,
                     )
                 except Exception as e:
                     await self._log_record_async(
-                        response, error=e, model=model, arguments=arguments
+                        response_buffer,
+                        error=e,
+                        model=model,
+                        messages=messages,
+                        arguments=arguments,
                     )
                     raise
 
@@ -381,11 +412,13 @@ class AsyncChatCompletionObserver(ChatCompletionObserver):
 
         try:
             response = await self.create_fn(**input_data)
-            await self._log_record_async(response, model=model, arguments=arguments)
+            await self._log_record_async(
+                response, model=model, messages=messages, arguments=arguments
+            )
             return response
         except Exception as e:
             await self._log_record_async(
-                response, error=e, model=model, arguments=arguments
+                response, error=e, model=model, messages=messages, arguments=arguments
             )
             raise
 
