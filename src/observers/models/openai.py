@@ -1,6 +1,6 @@
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
-
+from observers.stores.duckdb import DuckDBStore
 from openai import AsyncOpenAI, OpenAI
 from typing_extensions import Self
 
@@ -14,7 +14,6 @@ if TYPE_CHECKING:
     from openai.types.chat import ChatCompletion, ChatCompletionChunk
 
     from observers.stores.datasets import DatasetsStore
-    from observers.stores.duckdb import DuckDBStore
 
 
 class OpenAIRecord(ChatCompletionRecord):
@@ -87,7 +86,7 @@ class OpenAIRecord(ChatCompletionRecord):
 
 def wrap_openai(
     client: Union["OpenAI", "AsyncOpenAI"],
-    store: Optional[Union["DuckDBStore", "DatasetsStore"]] = None,
+    store: Optional[Union["DuckDBStore", "DatasetsStore"]] = DuckDBStore(),
     tags: Optional[List[str]] = None,
     properties: Optional[Dict[str, Any]] = None,
     logging_rate: Optional[float] = 1,

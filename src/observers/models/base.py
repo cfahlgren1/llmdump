@@ -57,7 +57,6 @@ class ChatCompletionRecord(Record):
             "error",
             "raw_response",
             "arguments",
-            "synced_at",
         ]
 
     @property
@@ -80,7 +79,6 @@ class ChatCompletionRecord(Record):
             error VARCHAR,
             raw_response JSON,
             arguments JSON,
-            synced_at TIMESTAMP
         )
         """
 

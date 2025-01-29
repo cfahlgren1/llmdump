@@ -84,19 +84,6 @@ class DuckDBStore(SQLStore):
         """Add a new record to the database asynchronously"""
         await asyncio.to_thread(self.add, record)
 
-    def get_unsynced(self, table_name: str) -> List[tuple]:
-        """Retrieve unsynced records"""
-        return self._conn.execute(
-            f"SELECT * FROM {table_name} WHERE synced_at IS NULL"
-        ).fetchall()
-
-    def mark_as_synced(self, record_ids: List[str], table_name: str) -> None:
-        """Mark specified records as synced"""
-        self._conn.execute(
-            f"UPDATE {table_name} SET synced_at = CURRENT_TIMESTAMP WHERE id = ANY($1)",
-            [record_ids],
-        )
-
     def close(self) -> None:
         """Close the database connection"""
         if self._conn:

@@ -47,7 +47,6 @@ response = client.chat.completions.create(
     messages=[{"role": "user", "content": "Tell me a joke."}],
 )
 print(response)
-
 ```
 
 ## Observers
