@@ -11,7 +11,6 @@ import duckdb
 
 from observers.stores.sql_base import SQLStore
 
-
 if TYPE_CHECKING:
     from observers.base import Record
 

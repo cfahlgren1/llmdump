@@ -1,10 +1,11 @@
 import os
 
-import observers
 from huggingface_hub import InferenceClient
 
+import observers
 
 api_key = os.getenv("HF_TOKEN")
+
 
 # Patch the HF client
 hf_client = InferenceClient(token=api_key)

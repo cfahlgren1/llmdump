@@ -1,8 +1,8 @@
 import os
 
-import observers
 from transformers import pipeline
 
+import observers
 
 token = os.getenv("HF_TOKEN")
 pipe = pipeline(
