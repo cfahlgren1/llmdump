@@ -6,72 +6,21 @@ import json
 import os
 import tempfile
 import uuid
-import warnings
 from dataclasses import asdict, dataclass, field
 from io import BytesIO
-from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional
 
+from datasets.utils.logging import disable_progress_bar
+from huggingface_hub import CommitScheduler, login, metadata_update, whoami
 from PIL import Image
 
-from datasets import Dataset
-from datasets import Image as DatasetImage
-from datasets.utils.logging import disable_progress_bar
-from huggingface_hub import CommitScheduler, login, metadata_update, upload_file, whoami
 from observers.stores.base import Store
-
 
 if TYPE_CHECKING:
     from observers.base import Record
 
 
 disable_progress_bar()
-
-
-def push_to_hub(self):
-    """Push pending changes to the Hugging Face Hub"""
-    json_files = Path(self.folder_path).rglob("*.json")
-    records = [json.loads(line) for json_file in json_files for line in open(json_file)]
-
-    if records:
-        image_keys: List[json.Any] = [
-            key
-            for key in records[0].keys()
-            if isinstance(records[0][key], dict) and "path" in records[0][key]
-        ]
-
-        for record in records:
-            for key in image_keys:
-                record[key] = str(Path(self.folder_path) / record[key]["path"])
-
-        dataset = Dataset.from_list(records)
-        for key in image_keys:
-            dataset = dataset.cast_column(key, DatasetImage())
-
-        with self.lock:
-            buffer = BytesIO()
-            dataset.to_parquet(buffer)
-            buffer.seek(0)
-            random_id = uuid.uuid4().hex
-            filename = f"data/train-{random_id}.parquet"
-            upload_file(
-                path_or_fileobj=buffer,
-                path_in_repo=filename,
-                repo_id=self.repo_id,
-                repo_type="dataset",
-                token=self.token,
-                commit_message=f"Upload {filename}",
-            )
-
-            # Delete all json files
-            for json_file in json_files:
-                try:
-                    json_file.unlink()
-                except Exception as e:
-                    warnings.warn(f"Failed to delete {json_file}: {e}")
-
-
-CommitScheduler.push_to_hub = push_to_hub
 
 
 @dataclass
